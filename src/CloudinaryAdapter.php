@@ -2,17 +2,20 @@
 
 namespace CodebarAg\Cloudinary;
 
-use Cloudinary\Uploader;
-use League\Flysystem\Adapter\AbstractAdapter;
-use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
+use Cloudinary\Api\Exception\ApiError;
+use Illuminate\Support\Str;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Config;
 
-class CloudinaryAdapter extends AbstractAdapter implements AdapterInterface
+class CloudinaryAdapter implements AdapterInterface
 {
-    use NotSupportingVisibilityTrait;
+    public function __construct(
+        public \Cloudinary\Cloudinary $cloudinary,
+    ) {
+    }
 
-    public function write($path, $contents, Config $config)
+    /** @inheritdoc */
+    public function write($path, $contents, Config $config): array | false
     {
         $tmpFile = tmpfile();
 
@@ -23,94 +26,140 @@ class CloudinaryAdapter extends AbstractAdapter implements AdapterInterface
         return false;
     }
 
-    public function writeStream($path, $resource, Config $config)
+    /** @inheritdoc */
+    public function writeStream($path, $resource, Config $config): array | false
     {
-        $metadata = stream_get_meta_data($resource);
-
         $options = [
-            'public_id' => $this->getPublicId($path),
+            'public_id' => Str::beforeLast($path, '.'),
             'use_filename' => true,
             'unique_filename' => false,
-            'folder' => 'www_riithalle_ch',
-            'upload_preset' => 'ml_default',
-            'resource_type' => $this->getResourceType($path),
+            'resource_type' => 'auto',
+            'type' => 'upload',
         ];
 
-        return Uploader::upload($metadata['uri'], $options);
+        try {
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->upload($resource, $options);
+        } catch (ApiError $e) {
+            return false;
+        }
+
+        [
+            'bytes' => $bytes,
+            'version' => $version,
+            'created_at' => $created_at,
+        ] = $response->getArrayCopy();
+
+        return [
+            'path' => $path,
+            'size' => $bytes,
+            'type' => 'file',
+            'version' => $version,
+            'timestamp' => strtotime($created_at),
+        ];
     }
 
-    public function update($path, $contents, Config $config)
+    /** @inheritdoc */
+    public function update($path, $contents, Config $config): array | false
     {
         // TODO: Implement update() method.
     }
 
-    public function updateStream($path, $resource, Config $config)
+    /** @inheritdoc */
+    public function updateStream($path, $resource, Config $config): array | false
     {
         // TODO: Implement updateStream() method.
     }
 
-    public function rename($path, $newpath)
+    /** @inheritdoc */
+    public function rename($path, $newpath): bool
     {
         // TODO: Implement rename() method.
     }
 
-    public function copy($path, $newpath)
+    /** @inheritdoc */
+    public function copy($path, $newpath): bool
     {
         // TODO: Implement copy() method.
     }
 
-    public function delete($path)
+    /** @inheritdoc */
+    public function delete($path): bool
     {
         // TODO: Implement delete() method.
     }
 
-    public function deleteDir($dirname)
+    /** @inheritdoc */
+    public function deleteDir($dirname): bool
     {
         // TODO: Implement deleteDir() method.
     }
 
-    public function createDir($dirname, Config $config)
+    /** @inheritdoc */
+    public function createDir($dirname, Config $config): array | false
     {
         // TODO: Implement createDir() method.
     }
 
-    public function has($path)
+    /** @inheritdoc */
+    public function setVisibility($path, $visibility): array | false
+    {
+        // TODO: Implement setVisibility() method.
+    }
+
+    /** @inheritdoc */
+    public function has($path): array | bool | null
     {
         // TODO: Implement has() method.
     }
 
-    public function read($path)
+    /** @inheritdoc */
+    public function read($path): array | false
     {
         // TODO: Implement read() method.
     }
 
-    public function readStream($path)
+    /** @inheritdoc */
+    public function readStream($path): array | false
     {
         // TODO: Implement readStream() method.
     }
 
-    public function listContents($directory = '', $recursive = false)
+    /** @inheritdoc */
+    public function listContents($directory = '', $recursive = false): array
     {
         // TODO: Implement listContents() method.
     }
 
-    public function getMetadata($path)
+    /** @inheritdoc */
+    public function getMetadata($path): array | false
     {
         // TODO: Implement getMetadata() method.
     }
 
-    public function getSize($path)
+    /** @inheritdoc */
+    public function getSize($path): array | false
     {
         // TODO: Implement getSize() method.
     }
 
-    public function getMimetype($path)
+    /** @inheritdoc */
+    public function getMimetype($path): array | false
     {
         // TODO: Implement getMimetype() method.
     }
 
-    public function getTimestamp($path)
+    /** @inheritdoc */
+    public function getTimestamp($path): array | false
     {
         // TODO: Implement getTimestamp() method.
+    }
+
+    /** @inheritdoc */
+    public function getVisibility($path): array | false
+    {
+        // TODO: Implement getVisibility() method.
     }
 }
