@@ -3,6 +3,8 @@
 namespace CodebarAg\Cloudinary;
 
 use Cloudinary\Api\Exception\ApiError;
+use Cloudinary\Cloudinary;
+use CodebarAg\Cloudinary\Events\CloudinaryResponseLog;
 use Illuminate\Support\Str;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Config;
@@ -10,7 +12,7 @@ use League\Flysystem\Config;
 class CloudinaryAdapter implements AdapterInterface
 {
     public function __construct(
-        public \Cloudinary\Cloudinary $cloudinary,
+        public Cloudinary $cloudinary,
     ) {
     }
 
@@ -42,9 +44,11 @@ class CloudinaryAdapter implements AdapterInterface
                 ->cloudinary
                 ->uploadApi()
                 ->upload($resource, $options);
-        } catch (ApiError $e) {
+        } catch (ApiError) {
             return false;
         }
+
+        event(new CloudinaryResponseLog($response));
 
         [
             'bytes' => $bytes,

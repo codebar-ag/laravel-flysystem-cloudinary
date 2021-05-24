@@ -2,9 +2,9 @@
 
 namespace CodebarAg\Cloudinary\Events;
 
+use Cloudinary\Api\ApiResponse;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Http\Client\Response;
 use Illuminate\Queue\SerializesModels;
 
 class CloudinaryResponseLog
@@ -13,7 +13,8 @@ class CloudinaryResponseLog
     use InteractsWithSockets;
     use SerializesModels;
 
-    public function __construct(public Response $response)
-    {
+    public function __construct(
+        public ApiResponse $response,
+    ) {
     }
 }
