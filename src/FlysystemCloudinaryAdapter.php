@@ -34,7 +34,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     public function writeStream($path, $resource, Config $config): array | false
     {
         $options = [
-            'public_id' => Str::beforeLast($path, '.'),
+            'public_id' => $path,
             'use_filename' => true,
             'unique_filename' => false,
             'resource_type' => 'auto',
