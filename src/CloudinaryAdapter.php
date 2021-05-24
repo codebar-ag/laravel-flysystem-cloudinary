@@ -3,6 +3,7 @@
 namespace CodebarAg\Cloudinary;
 
 use Cloudinary\Api\Exception\ApiError;
+use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Cloudinary;
 use CodebarAg\Cloudinary\Events\CloudinaryResponseLog;
 use Illuminate\Support\Str;
@@ -68,19 +69,30 @@ class CloudinaryAdapter implements AdapterInterface
     /** @inheritdoc */
     public function update($path, $contents, Config $config): array | false
     {
-        // TODO: Implement update() method.
+        return $this->write($path, $contents, $config);
     }
 
     /** @inheritdoc */
     public function updateStream($path, $resource, Config $config): array | false
     {
-        // TODO: Implement updateStream() method.
+        return $this->write($path, $resource, $config);
     }
 
     /** @inheritdoc */
     public function rename($path, $newpath): bool
     {
-        // TODO: Implement rename() method.
+        try {
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->rename($path, $newpath);
+        } catch (NotFound) {
+            return false;
+        }
+
+        event(new CloudinaryResponseLog($response));
+
+        return true;
     }
 
     /** @inheritdoc */
@@ -116,7 +128,22 @@ class CloudinaryAdapter implements AdapterInterface
     /** @inheritdoc */
     public function has($path): array | bool | null
     {
-        // TODO: Implement has() method.
+        $options = [
+            'type' => 'upload',
+        ];
+
+        try {
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->explicit($path, $options);
+        } catch (NotFound) {
+            return false;
+        }
+
+        event(new CloudinaryResponseLog($response));
+
+        return true;
     }
 
     /** @inheritdoc */
