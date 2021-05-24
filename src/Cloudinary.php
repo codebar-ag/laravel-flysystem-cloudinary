@@ -25,6 +25,7 @@ class Cloudinary
     {
         return pathinfo($path, PATHINFO_BASENAME);
     }
+
     public static function getPath(string $path, $folder = null): string
     {
         $folder = isset($folder) ?? config('cloudinary.folder');

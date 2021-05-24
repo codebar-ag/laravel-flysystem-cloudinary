@@ -28,12 +28,12 @@ class CloudinaryAdapter extends AbstractAdapter implements AdapterInterface
         $metadata = stream_get_meta_data($resource);
 
         $options = [
-            'public_id'       => $this->getPublicId($path),
-            'use_filename'    => true,
+            'public_id' => $this->getPublicId($path),
+            'use_filename' => true,
             'unique_filename' => false,
             'folder' => 'www_riithalle_ch',
             'upload_preset' => 'ml_default',
-            'resource_type'   => $this->getResourceType($path),
+            'resource_type' => $this->getResourceType($path),
         ];
 
         return Uploader::upload($metadata['uri'], $options);
