@@ -1,13 +1,13 @@
 <?php
 
-namespace CodebarAg\Cloudinary\Events;
+namespace CodebarAg\FlysystemCloudinary\Events;
 
 use Cloudinary\Api\ApiResponse;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class CloudinaryResponseLog
+class FlysystemCloudinaryResponseLog
 {
     use Dispatchable;
     use InteractsWithSockets;

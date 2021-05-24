@@ -1,5 +1,5 @@
 {
-    "name": "codebar-ag/laravel-cloudinary",
+    "name": "codebar-ag/laravel-flysystem-cloudinary",
     "description": "Cloudinary integration with Laravel",
     "keywords": [
         "laravel",
@@ -7,7 +7,7 @@
         "cloudinary",
         "laravel-cloudinary"
     ],
-    "homepage": "https://github.com/codebar-ag/laravel-cloudinary",
+    "homepage": "https://github.com/codebar-ag/laravel-flysystem-cloudinary",
     "license": "MIT",
     "authors": [
         {
@@ -39,12 +39,12 @@
     },
     "autoload": {
         "psr-4": {
-            "CodebarAg\\Cloudinary\\": "src"
+            "CodebarAg\\FlysystemCloudinary\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "CodebarAg\\Cloudinary\\Tests\\": "tests"
+            "CodebarAg\\FlysystemCloudinary\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -59,7 +59,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "CodebarAg\\Cloudinary\\CloudinaryServiceProvider"
+                "CodebarAg\\FlysystemCloudinary\\FlysystemCloudinaryServiceProvider"
             ]
         }
     },

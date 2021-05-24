@@ -1,16 +1,17 @@
 <?php
 
-namespace CodebarAg\Cloudinary;
+namespace CodebarAg\FlysystemCloudinary;
 
+use Cloudinary\Api\ApiResponse;
 use Cloudinary\Api\Exception\ApiError;
 use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Cloudinary;
-use CodebarAg\Cloudinary\Events\CloudinaryResponseLog;
+use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use Illuminate\Support\Str;
-use League\Flysystem\AdapterInterface;
+use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Config;
 
-class CloudinaryAdapter implements AdapterInterface
+class FlysystemCloudinaryAdapter extends AbstractAdapter
 {
     public function __construct(
         public Cloudinary $cloudinary,
@@ -49,7 +50,7 @@ class CloudinaryAdapter implements AdapterInterface
             return false;
         }
 
-        event(new CloudinaryResponseLog($response));
+        event(new FlysystemCloudinaryResponseLog($response));
 
         [
             'bytes' => $bytes,
@@ -90,7 +91,7 @@ class CloudinaryAdapter implements AdapterInterface
             return false;
         }
 
-        event(new CloudinaryResponseLog($response));
+        event(new FlysystemCloudinaryResponseLog($response));
 
         return true;
     }
@@ -104,7 +105,18 @@ class CloudinaryAdapter implements AdapterInterface
     /** @inheritdoc */
     public function delete($path): bool
     {
-        // TODO: Implement delete() method.
+        try {
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->destroy($path);
+        } catch (NotFound) {
+            return false;
+        }
+
+        event(new FlysystemCloudinaryResponseLog($response));
+
+        return true;
     }
 
     /** @inheritdoc */
@@ -141,7 +153,7 @@ class CloudinaryAdapter implements AdapterInterface
             return false;
         }
 
-        event(new CloudinaryResponseLog($response));
+        event(new FlysystemCloudinaryResponseLog($response));
 
         return true;
     }
@@ -192,5 +204,24 @@ class CloudinaryAdapter implements AdapterInterface
     public function getVisibility($path): array | false
     {
         // TODO: Implement getVisibility() method.
+    }
+
+    public function getUrl(string $path): string
+    {
+        $options = [
+            'type' => 'upload',
+        ];
+
+        /** @var ApiResponse $response */
+        $response = $this
+            ->cloudinary
+            ->uploadApi()
+            ->explicit($path, $options);
+
+        event(new FlysystemCloudinaryResponseLog($response));
+
+        ['url' => $url] = $response->getArrayCopy();
+
+        return $url;
     }
 }

@@ -33,13 +33,4 @@
             <clover outputFile="build/logs/clover.xml"/>
         </report>
     </coverage>
-    <logging>
-        <junit outputFile="build/report.junit.xml"/>
-    </logging>
-    <php>
-        <env name="TWILIO_URL" value="https://verify.twilio.com/v2/Services"/>
-        <env name="TWILIO_ACCOUNT_SID" value="ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
-        <env name="TWILIO_AUTH_TOKEN" value="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
-        <env name="TWILIO_SERVICE_SID" value="VAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
-    </php>
 </phpunit>

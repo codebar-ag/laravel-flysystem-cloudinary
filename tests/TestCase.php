@@ -1,8 +1,8 @@
 <?php
 
-namespace CodebarAg\Cloudinary\Tests;
+namespace CodebarAg\FlysystemCloudinary\Tests;
 
-use CodebarAg\Cloudinary\CloudinaryServiceProvider;
+use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -10,7 +10,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
-            CloudinaryServiceProvider::class,
+            FlysystemCloudinaryServiceProvider::class,
         ];
     }
 

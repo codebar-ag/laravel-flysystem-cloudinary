@@ -15,7 +15,7 @@ wip
 You can install the package via composer:
 
 ```bash
-composer require codebar-ag/laravel-cloudinary
+composer require codebar-ag/laravel-flysystem-cloudinary
 ```
 
 Add the following environment variables to your `.env` file:
