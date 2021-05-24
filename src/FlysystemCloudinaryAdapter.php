@@ -7,7 +7,6 @@ use Cloudinary\Api\Exception\ApiError;
 use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
-use Illuminate\Support\Str;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Config;
 
