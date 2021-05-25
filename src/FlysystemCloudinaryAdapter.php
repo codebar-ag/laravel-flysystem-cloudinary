@@ -296,7 +296,31 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getMetadata($path): array | false
     {
-        // TODO: Implement getMetadata() method.
+        $options = [
+            'type' => 'upload',
+        ];
+
+        try {
+            /** @var ApiResponse $response */
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->explicit($path, $options);
+        } catch (NotFound) {
+            return false;
+        }
+
+        event(new FlysystemCloudinaryResponseLog($response));
+
+        ['storage' => $storage] = $response->getArrayCopy();
+
+        return [
+            'path' => $storage['public_id'],
+            'size' => $storage['bytes'],
+            'type' => 'file',
+            'version' => $storage['version'],
+            'timestamp' => strtotime($storage['created_at']),
+        ];
     }
 
     /**
@@ -304,7 +328,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getSize($path): array | false
     {
-        // TODO: Implement getSize() method.
+        return $this->getMetadata($path);
     }
 
     /**
@@ -312,7 +336,23 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getMimetype($path): array | false
     {
-        // TODO: Implement getMimetype() method.
+        $contents = $this->read($path);
+
+        $temp = tmpfile();
+
+        fwrite($temp, $contents['contents']);
+
+        $mime = mime_content_type($temp);
+
+        fclose($temp);
+
+        if ($mime === false) {
+            return false;
+        }
+
+        return [
+            'mimetype' => $mime,
+        ];
     }
 
     /**
@@ -320,7 +360,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getTimestamp($path): array | false
     {
-        // TODO: Implement getTimestamp() method.
+        return $this->getMimetype($path);
     }
 
     public function getUrl(string $path): string
