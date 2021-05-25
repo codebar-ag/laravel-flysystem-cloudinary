@@ -33,4 +33,10 @@
             <clover outputFile="build/logs/clover.xml"/>
         </report>
     </coverage>
+    <php>
+        <env name="FILESYSTEM_DRIVER" value="cloudinary"/>
+        <env name="CLOUDINARY_CLOUD_NAME" value="my-cloud-name"/>
+        <env name="CLOUDINARY_API_KEY" value="my-api-key"/>
+        <env name="CLOUDINARY_API_SECRET" value="my-api-secret"/>
+    </php>
 </phpunit>

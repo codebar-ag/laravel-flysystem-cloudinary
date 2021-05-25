@@ -1,10 +1,11 @@
 {
     "name": "codebar-ag/laravel-flysystem-cloudinary",
-    "description": "Cloudinary integration with Laravel",
+    "description": "Cloudinary Flysystem v1 integration with Laravel",
     "keywords": [
         "laravel",
         "codebar-ag",
         "cloudinary",
+        "flysystem-adapter",
         "laravel-cloudinary"
     ],
     "homepage": "https://github.com/codebar-ag/laravel-flysystem-cloudinary",

@@ -1,8 +1,11 @@
-<img src="https://banners.beyondco.de/Laravel%20Cloudinary.png?theme=light&packageManager=composer+require&packageName=codebar-ag%2Flaravel-cloudinary&pattern=circuitBoard&style=style_2&description=An+opinionated+way+to+integrate+Cloudinary+with+Laravel&md=1&showWatermark=0&fontSize=150px&images=cloud&widths=500&heights=500">
+<img src="https://banners.beyondco.de/Laravel%20Flysystem%20Cloudinary.png?theme=light&packageManager=composer+require&packageName=codebar-ag%2Flaravel-flysystem-cloudinary&pattern=circuitBoard&style=style_2&description=An+opinionated+way+to+integrate+Cloudinary+with+the+Laravel+filesystem&md=1&showWatermark=0&fontSize=150px&images=cloud&widths=500&heights=500">
 
 ## 💡 What is Cloudinary?
 
-wip
+Cloudinary is basically a fantastic way to store and serve assets like images
+or videos. You can upload your full resolution image to Cloudinary, and they
+handle the optimization for you. The only thing you have to do is to add
+additional parameters to your url 😉
 
 ## 🛠 Requirements
 
@@ -43,9 +46,9 @@ Add the following environment variables to your `.env` file:
 ```shell
 FILESYSTEM_DRIVER=cloudinary
 
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
+CLOUDINARY_CLOUD_NAME=my-cloud-name
+CLOUDINARY_API_KEY=my-api-key
+CLOUDINARY_API_SECRET=my-api-secret
 ```
 
 ## 🔧 Configuration file
@@ -99,7 +102,12 @@ cp phpunit.xml.dist phpunit.xml
 
 Modify environment variables in the phpunit.xml-file:
 ```xml
-wip
+<php>
+    <env name="FILESYSTEM_DRIVER" value="cloudinary"/>
+    <env name="CLOUDINARY_CLOUD_NAME" value="my-cloud-name"/>
+    <env name="CLOUDINARY_API_KEY" value="my-api-key"/>
+    <env name="CLOUDINARY_API_SECRET" value="my-api-secret"/>
+</php>
 ```
 
 Run the tests:
