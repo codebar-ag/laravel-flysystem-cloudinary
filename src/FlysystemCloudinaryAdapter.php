@@ -10,6 +10,7 @@ use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
+use LogicException;
 
 class FlysystemCloudinaryAdapter extends AbstractAdapter
 {
@@ -25,6 +26,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function write($path, $contents, Config $config): array | false
     {
+        ray('adapter write');
+
         return $this->upload($path, $contents);
     }
 
@@ -33,7 +36,9 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function writeStream($path, $resource, Config $config): array | false
     {
-        return $this->upload($path, $resource);
+        ray('adapter writeStream');
+
+        throw new LogicException(self::class . ' does not support stream. Path: ' . $path);
     }
 
     /**
@@ -41,6 +46,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function update($path, $contents, Config $config): array | false
     {
+        ray('adapter upload');
+
         return $this->upload($path, $contents);
     }
 
@@ -49,13 +56,15 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function updateStream($path, $resource, Config $config): array | false
     {
-        return $this->upload($path, $resource);
+        ray('adapter updateStream');
+
+        throw new LogicException(self::class . ' does not support stream. Path: ' . $path);
     }
 
     /**
      * https://cloudinary.com/documentation/image_upload_api_reference#upload_method
      */
-    protected function upload(string $path, $contents): array | false
+    protected function upload(string $path, string $contents): array | false
     {
         $tmpFile = tmpfile();
 
@@ -86,16 +95,18 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
 
         [
             'bytes' => $bytes,
-            'version' => $version,
             'created_at' => $created_at,
         ] = $response->getArrayCopy();
 
+        // https://flysystem.thephpleague.com/v1/docs/architecture/
         return [
-            'path' => $path,
-            'size' => $bytes,
             'type' => 'file',
-            'version' => $version,
+            'path' => $path,
+            'contents' => $contents,
+            'visibility' => 'public',
             'timestamp' => strtotime($created_at),
+            'size' => $bytes,
+            'bytes' => $bytes,
         ];
     }
 
@@ -106,6 +117,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function rename($path, $newpath): bool
     {
+        ray('adapter rename');
+
         try {
             $response = $this
                 ->cloudinary
@@ -125,6 +138,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function copy($path, $newpath): bool
     {
+        ray('adapter copy');
+
         $object = $this->read($path);
 
         if ($object === false) {
@@ -151,6 +166,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function delete($path): bool
     {
+        ray('adapter delete');
+
         try {
             $response = $this
                 ->cloudinary
@@ -170,6 +187,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function deleteDir($dirname): bool
     {
+        ray('adapter deleteDir');
+
         try {
             $response = $this
                 ->cloudinary
@@ -189,6 +208,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function createDir($dirname, Config $config): array | false
     {
+        ray('adapter createDir');
+
         try {
             $response = $this
                 ->cloudinary
@@ -201,7 +222,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         event(new FlysystemCloudinaryResponseLog($response));
 
         return [
-            'path' => ltrim($dirname, '/'),
+            'path' => trim($dirname, '/'),
             'type' => 'dir',
         ];
     }
@@ -213,6 +234,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function has($path): array | bool | null
     {
+        ray('adapter has');
+
         $options = [
             'type' => 'upload',
         ];
@@ -236,6 +259,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function read($path): array | false
     {
+        ray('adapter read');
+
         $object = $this->readStream($path);
 
         if ($object === false) {
@@ -252,6 +277,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function readStream($path): array | false
     {
+        ray('adapter readStream');
+
         $url = $this->getUrl($path);
 
         $contents = file_get_contents($url);
@@ -270,6 +297,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function listContents($directory = '', $recursive = false): array
     {
+        ray('adapter listContents');
+
         $options = [
             'type' => 'upload',
             'prefix' => $directory,
@@ -302,6 +331,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getMetadata($path): array | false
     {
+        ray('adapter getMetadata');
+
         $options = [
             'type' => 'upload',
         ];
@@ -334,6 +365,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getSize($path): array | false
     {
+        ray('adapter getSize');
+
         return $this->getMetadata($path);
     }
 
@@ -342,6 +375,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getMimetype($path): array | false
     {
+        ray('adapter getMimetype');
+
         $contents = $this->read($path);
 
         $temp = tmpfile();
@@ -366,11 +401,15 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getTimestamp($path): array | false
     {
+        ray('adapter getTimestamp');
+
         return $this->getMimetype($path);
     }
 
     public function getUrl(string $path): string
     {
+        ray('adapter getUrl');
+
         $options = [
             'type' => 'upload',
         ];

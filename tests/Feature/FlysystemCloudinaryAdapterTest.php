@@ -38,14 +38,20 @@ class FlysystemCloudinaryAdapterTest extends TestCase
     /** @test */
     public function it_can_write()
     {
-        $meta = $this->adapter->write(
-            'image-write',
-            File::image('black.jpg')->getContent(),
-            new Config(),
-        );
+        $publicId = 'image-write';
+        $fakeImage = File::image('black.jpg')->getContent();
 
-        $this->assertSame('image-write', $meta['path']);
-        $this->assertSame(695, $meta['size']);
+        $meta = $this->adapter->write($publicId, $fakeImage, new Config());
+
         $this->assertSame('file', $meta['type']);
+        $this->assertSame($publicId, $meta['path']);
+        $this->assertIsString($meta['contents']);
+        $this->assertSame('public', $meta['visibility']);
+        $this->assertIsInt($meta['timestamp']);
+        $this->assertSame(695, $meta['size']);
+        $this->assertSame(695, $meta['bytes']);
+
+        // cleanup
+        $this->adapter->delete('image-write');
     }
 }
