@@ -25,23 +25,45 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function write($path, $contents, Config $config): array | false
     {
-        $tmpFile = tmpfile();
-
-        if (fwrite($tmpFile, $contents)) {
-            return $this->writeStream($path, $tmpFile, $config);
-        }
-
-        return false;
+        return $this->upload($path, $contents);
     }
 
     /**
      * @inheritDoc
-     *
-     * https://cloudinary.com/documentation/image_upload_api_reference#upload_method
      */
     public function writeStream($path, $resource, Config $config): array | false
     {
-        $path = ltrim($path, '/');
+        return $this->upload($path, $resource);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function update($path, $contents, Config $config): array | false
+    {
+        return $this->upload($path, $contents);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function updateStream($path, $resource, Config $config): array | false
+    {
+        return $this->upload($path, $resource);
+    }
+
+    /**
+     * https://cloudinary.com/documentation/image_upload_api_reference#upload_method
+     */
+    protected function upload(string $path, $contents): array | false
+    {
+        $tmpFile = tmpfile();
+
+        if (fwrite($tmpFile, $contents) === false) {
+            return false;
+        }
+
+        $path = trim($path, '/');
 
         $options = [
             'type' => 'upload',
@@ -55,7 +77,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             $response = $this
                 ->cloudinary
                 ->uploadApi()
-                ->upload($resource, $options);
+                ->upload($tmpFile, $options);
         } catch (ApiError) {
             return false;
         }
@@ -75,22 +97,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             'version' => $version,
             'timestamp' => strtotime($created_at),
         ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function update($path, $contents, Config $config): array | false
-    {
-        return $this->write($path, $contents, $config);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function updateStream($path, $resource, Config $config): array | false
-    {
-        return $this->write($path, $resource, $config);
     }
 
     /**
