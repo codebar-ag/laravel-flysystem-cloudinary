@@ -14,33 +14,86 @@ wip
 
 You can install the package via composer:
 
-```bash
+```shell
 composer require codebar-ag/laravel-flysystem-cloudinary
+```
+
+Add the following disk to your filesystem "disks" list in your `filesystems.php`
+configuration:
+
+```php
+    'disks' => [
+        //
+
+        'cloudinary' => [
+            'driver' => 'cloudinary',
+            'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+            'api_key' => env('CLOUDINARY_API_KEY'),
+            'api_secret' => env('CLOUDINARY_API_SECRET'),
+            'url' => [
+                'secure' => env('CLOUDINARY_URL_SECURE', true),
+            ],
+        ],
+
+    ],
 ```
 
 Add the following environment variables to your `.env` file:
 
-```bash
-wip
+```shell
+FILESYSTEM_DRIVER=cloudinary
+
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
 ## 🔧 Configuration file
 
 You can publish the config file with:
-```bash
-php artisan vendor:publish --provider="CodebarAg\TwilioVerify\TwilioVerifyServiceProvider" --tag="laravel-cloudinary"
+
+```shell
+php artisan vendor:publish --tag="flysystem-cloudinary"
 ```
 
 This is the contents of the published config file:
 
 ```php
-wip
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cloudinary Upload Preset
+    |--------------------------------------------------------------------------
+    |
+    | Upload preset allow you to define the default behavior for all your
+    | assets. They have precedence over client-side upload parameters.
+    | You can define your upload preset in your cloudinary settings.
+    */
+
+    'upload_preset' => env('CLOUDINARY_UPLOAD_PRESET'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cloudinary Folder
+    |--------------------------------------------------------------------------
+    |
+    | An optional folder name where the uploaded asset will be stored. The
+    | public ID contains the full path of the uploaded asset, including
+    | the folder name. This is very useful to prefix assets directly.
+    */
+
+    'folder' => env('CLOUDINARY_FOLDER'),
+
+];
 ```
 
 ## 🚧 Testing
 
 Copy your own phpunit.xml-file.
-```bash
+```shell
 cp phpunit.xml.dist phpunit.xml
 ```
 
@@ -50,7 +103,7 @@ wip
 ```
 
 Run the tests:
-```bash
+```shell
 composer test
 ```
 
