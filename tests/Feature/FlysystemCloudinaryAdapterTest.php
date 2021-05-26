@@ -185,4 +185,27 @@ class FlysystemCloudinaryAdapterTest extends TestCase
         ], $meta);
         $this->adapter->deleteDir($directory); // cleanup
     }
+
+    /** @test */
+    public function it_can_check_if_file_exists()
+    {
+        $publicId = 'file-has-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $bool = $this->adapter->has($publicId);
+
+        $this->assertTrue($bool);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_can_check_if_file_does_not_exist()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $bool = $this->adapter->has($publicId);
+
+        $this->assertFalse($bool);
+    }
 }
