@@ -10,7 +10,7 @@ use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
-use LogicException;
+use League\Flysystem\Util;
 
 class FlysystemCloudinaryAdapter extends AbstractAdapter
 {
@@ -38,7 +38,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter writeStream');
 
-        throw new LogicException(self::class . ' does not support stream. Path: ' . $path);
+        return $this->upload($path, $resource);
     }
 
     /**
@@ -58,17 +58,21 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter updateStream');
 
-        throw new LogicException(self::class . ' does not support stream. Path: ' . $path);
+        return $this->upload($path, $resource);
     }
 
     /**
+     * Upload an object.
+     *
      * https://cloudinary.com/documentation/image_upload_api_reference#upload_method
+     *
+     * @param string|resource $body
      */
-    protected function upload(string $path, string $contents): array | false
+    protected function upload(string $path, $body): array | false
     {
         $tmpFile = tmpfile();
 
-        if (fwrite($tmpFile, $contents) === false) {
+        if (fwrite($tmpFile, $body) === false) {
             return false;
         }
 
@@ -93,21 +97,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
 
         event(new FlysystemCloudinaryResponseLog($response));
 
-        [
-            'bytes' => $bytes,
-            'created_at' => $created_at,
-        ] = $response->getArrayCopy();
-
-        // https://flysystem.thephpleague.com/v1/docs/architecture/
-        return [
-            'type' => 'file',
-            'path' => $path,
-            'contents' => $contents,
-            'visibility' => 'public',
-            'timestamp' => strtotime($created_at),
-            'size' => $bytes,
-            'bytes' => $bytes,
-        ];
+        return $this->normalizeResponse($response, $path, $body);
     }
 
     /**
@@ -425,5 +415,40 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         ['url' => $url] = $response->getArrayCopy();
 
         return $url;
+    }
+
+    /**
+     * Normalize the object result array.
+     *
+     * https://flysystem.thephpleague.com/v1/docs/architecture/
+     *
+     * @param string|resource $body
+     */
+    protected function normalizeResponse(
+        ApiResponse $response,
+        string $path,
+        $body,
+    ): array {
+        [
+            'access_mode' => $visibility,
+            'bytes' => $size,
+            'created_at' => $createdAt,
+            'etag' => $etag,
+            'version' => $version,
+            'version_id' => $versionId,
+        ] = $response->getArrayCopy();
+
+        return [
+            'contents' => $body,
+            'etag' => $etag,
+            'mimetype' => Util::guessMimeType($path, $body),
+            'path' => $path,
+            'size' => $size,
+            'timestamp' => strtotime($createdAt),
+            'type' => 'file',
+            'version' => $version,
+            'versionid' => $versionId,
+            'visibility' => $visibility === 'public' ? 'public' : 'private',
+        ];
     }
 }

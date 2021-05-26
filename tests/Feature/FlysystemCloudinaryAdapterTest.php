@@ -43,13 +43,16 @@ class FlysystemCloudinaryAdapterTest extends TestCase
 
         $meta = $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $this->assertSame('file', $meta['type']);
-        $this->assertSame($publicId, $meta['path']);
         $this->assertIsString($meta['contents']);
-        $this->assertSame('public', $meta['visibility']);
-        $this->assertIsInt($meta['timestamp']);
+        $this->assertIsString($meta['etag']);
+        $this->assertSame('image/jpeg', $meta['mimetype']);
+        $this->assertSame($publicId, $meta['path']);
         $this->assertSame(695, $meta['size']);
-        $this->assertSame(695, $meta['bytes']);
+        $this->assertIsInt($meta['timestamp']);
+        $this->assertSame('file', $meta['type']);
+        $this->assertIsInt($meta['version']);
+        $this->assertIsString($meta['versionid']);
+        $this->assertSame('public', $meta['visibility']);
 
         // cleanup
         $this->adapter->delete('image-write');
