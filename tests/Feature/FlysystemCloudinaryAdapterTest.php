@@ -276,4 +276,34 @@ class FlysystemCloudinaryAdapterTest extends TestCase
 
         $this->assertFalse($bool);
     }
+
+    /** @test */
+    public function it_can_list_directory_contents()
+    {
+        $files = $this->adapter->listContents('sandbox');
+
+        $this->assertIsArray($files);
+    }
+
+    /** @test */
+    public function it_does_get_metadata()
+    {
+        $publicId = 'file-get-metadata-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $meta = $this->adapter->getMetadata($publicId);
+
+        $this->assertIsString($meta['contents']);
+        $this->assertNull($meta['etag']);
+        $this->assertSame('image/jpeg', $meta['mimetype']);
+        $this->assertSame($publicId, $meta['path']);
+        $this->assertSame(695, $meta['size']);
+        $this->assertIsInt($meta['timestamp']);
+        $this->assertSame('file', $meta['type']);
+        $this->assertIsInt($meta['version']);
+        $this->assertIsString($meta['versionid']);
+        $this->assertSame('public', $meta['visibility']);
+        $this->adapter->delete($publicId); // cleanup
+    }
 }

@@ -298,6 +298,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         ];
 
         try {
+            /** @var ApiResponse $response */
             $response = $this
                 ->cloudinary
                 ->uploadApi()
@@ -336,21 +337,13 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
                 ->cloudinary
                 ->adminApi()
                 ->assets($options);
-        } catch (ApiError) {
+        } catch (RateLimited) {
             return [];
         }
 
-        ['resources' => $resources] = $response->getArrayCopy();
-
-        return array_map(function ($resource) {
-            return [
-                'path' => $resource['public_id'],
-                'size' => $resource['bytes'],
-                'type' => 'file',
-                'version' => $resource['version'],
-                'timestamp' => strtotime($resource['created_at']),
-            ];
-        }, $resources);
+        return array_map(function (array $resource) {
+            return $this->normalizeResponse($resource, $resource['public_id']);
+        }, $response->getArrayCopy()['resources']);
     }
 
     /**
@@ -360,31 +353,13 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter getMetadata');
 
-        $options = [
-            'type' => 'upload',
-        ];
+        $meta = $this->readObject($path);
 
-        try {
-            /** @var ApiResponse $response */
-            $response = $this
-                ->cloudinary
-                ->uploadApi()
-                ->explicit($path, $options);
-        } catch (NotFound) {
+        if ($meta === false) {
             return false;
         }
 
-        event(new FlysystemCloudinaryResponseLog($response));
-
-        ['storage' => $storage] = $response->getArrayCopy();
-
-        return [
-            'path' => $storage['public_id'],
-            'size' => $storage['bytes'],
-            'type' => 'file',
-            'version' => $storage['version'],
-            'timestamp' => strtotime($storage['created_at']),
-        ];
+        return $meta;
     }
 
     /**
@@ -459,12 +434,12 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      *
      * https://flysystem.thephpleague.com/v1/docs/architecture/
      *
-     * @param string|resource $body
+     * @param string|resource|null $body
      */
     protected function normalizeResponse(
-        ApiResponse $response,
+        ApiResponse | array $response,
         string $path,
-        $body,
+        $body = null,
     ): array {
         return [
             'contents' => $body,
