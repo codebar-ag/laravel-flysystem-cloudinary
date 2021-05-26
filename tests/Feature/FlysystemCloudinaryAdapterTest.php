@@ -38,11 +38,53 @@ class FlysystemCloudinaryAdapterTest extends TestCase
     /** @test */
     public function it_can_write()
     {
-        $publicId = 'image-write';
+        $publicId = 'file-name-' . rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->write($publicId, $fakeImage, new Config());
 
+        $this->assertUploadResponse($meta, $publicId);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_can_write_stream()
+    {
+        $publicId = 'file-name-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+
+        $meta = $this->adapter->writeStream($publicId, $fakeImage, new Config());
+
+        $this->assertUploadResponse($meta, $publicId);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_can_update()
+    {
+        $publicId = 'file-name-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+
+        $meta = $this->adapter->update($publicId, $fakeImage, new Config());
+
+        $this->assertUploadResponse($meta, $publicId);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_can_update_stream()
+    {
+        $publicId = 'file-name-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+
+        $meta = $this->adapter->updateStream($publicId, $fakeImage, new Config());
+
+        $this->assertUploadResponse($meta, $publicId);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    protected function assertUploadResponse(array $meta, string $publicId): void
+    {
         $this->assertIsString($meta['contents']);
         $this->assertIsString($meta['etag']);
         $this->assertSame('image/jpeg', $meta['mimetype']);
@@ -53,8 +95,5 @@ class FlysystemCloudinaryAdapterTest extends TestCase
         $this->assertIsInt($meta['version']);
         $this->assertIsString($meta['versionid']);
         $this->assertSame('public', $meta['visibility']);
-
-        // cleanup
-        $this->adapter->delete('image-write');
     }
 }
