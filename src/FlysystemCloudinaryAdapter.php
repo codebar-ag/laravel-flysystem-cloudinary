@@ -379,23 +379,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter getMimetype');
 
-        $contents = $this->read($path);
-
-        $temp = tmpfile();
-
-        fwrite($temp, $contents['contents']);
-
-        $mime = mime_content_type($temp);
-
-        fclose($temp);
-
-        if ($mime === false) {
-            return false;
-        }
-
-        return [
-            'mimetype' => $mime,
-        ];
+        return $this->getMetadata($path);
     }
 
     /**
@@ -405,7 +389,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter getTimestamp');
 
-        return $this->getMimetype($path);
+        return $this->getMetadata($path);
     }
 
     public function getUrl(string $path): string

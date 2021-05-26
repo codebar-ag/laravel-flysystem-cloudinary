@@ -294,6 +294,91 @@ class FlysystemCloudinaryAdapterTest extends TestCase
 
         $meta = $this->adapter->getMetadata($publicId);
 
+        $this->assertMetadataResponse($meta, $publicId);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_does_not_get_metadata_if_file_is_not_found()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $bool = $this->adapter->getMetadata($publicId);
+
+        $this->assertFalse($bool);
+    }
+
+    /** @test */
+    public function it_does_get_size()
+    {
+        $publicId = 'file-get-size-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $meta = $this->adapter->getSize($publicId);
+
+        $this->assertMetadataResponse($meta, $publicId);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_does_not_get_size_if_file_is_not_found()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $bool = $this->adapter->getSize($publicId);
+
+        $this->assertFalse($bool);
+    }
+
+    /** @test */
+    public function it_does_get_mimetype()
+    {
+        $publicId = 'file-get-mimetype-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $meta = $this->adapter->getMimetype($publicId);
+
+        $this->assertMetadataResponse($meta, $publicId);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_does_not_get_mimetype_if_file_is_not_found()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $bool = $this->adapter->getMimetype($publicId);
+
+        $this->assertFalse($bool);
+    }
+
+    /** @test */
+    public function it_does_get_timestamp()
+    {
+        $publicId = 'file-get-mimetype-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $meta = $this->adapter->getTimestamp($publicId);
+
+        $this->assertMetadataResponse($meta, $publicId);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_does_not_get_timestamp_if_file_is_not_found()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $bool = $this->adapter->getTimestamp($publicId);
+
+        $this->assertFalse($bool);
+    }
+
+    protected function assertMetadataResponse(array $meta, string $publicId): void
+    {
         $this->assertIsString($meta['contents']);
         $this->assertNull($meta['etag']);
         $this->assertSame('image/jpeg', $meta['mimetype']);
@@ -304,6 +389,18 @@ class FlysystemCloudinaryAdapterTest extends TestCase
         $this->assertIsInt($meta['version']);
         $this->assertIsString($meta['versionid']);
         $this->assertSame('public', $meta['visibility']);
+    }
+
+    /** @test */
+    public function it_does_get_url()
+    {
+        $publicId = 'file-get-url-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $url = $this->adapter->getUrl($publicId);
+
+        $this->assertStringContainsString($publicId, $url);
         $this->adapter->delete($publicId); // cleanup
     }
 }
