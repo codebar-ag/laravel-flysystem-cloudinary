@@ -9,6 +9,7 @@ use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Api\Exception\RateLimited;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
+use Illuminate\Support\Arr;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
@@ -261,15 +262,13 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter read');
 
-        $object = $this->readStream($path);
+        $meta = $this->readObject($path);
 
-        if ($object === false) {
+        if ($meta === false) {
             return false;
         }
 
-        return [
-            'contents' => $object['stream'],
-        ];
+        return $meta;
     }
 
     /**
@@ -279,7 +278,41 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter readStream');
 
-        $url = $this->getUrl($path);
+        $meta = $this->readObject($path);
+
+        if ($meta === false) {
+            return false;
+        }
+
+        $meta['stream'] = $meta['contents'];
+        unset($meta['contents']);
+
+        return $meta;
+    }
+
+    /**
+     * Read an object.
+     *
+     * https://cloudinary.com/documentation/image_upload_api_reference#explicit_method
+     */
+    public function readObject(string $path): array | bool
+    {
+        $options = [
+            'type' => 'upload',
+        ];
+
+        try {
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->explicit($path, $options);
+        } catch (NotFound) {
+            return false;
+        }
+
+        event(new FlysystemCloudinaryResponseLog($response));
+
+        ['url' => $url] = $response->getArrayCopy();
 
         $contents = file_get_contents($url);
 
@@ -287,9 +320,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             return false;
         }
 
-        return [
-            'stream' => $contents,
-        ];
+        return $this->normalizeResponse($response, $path, $contents);
     }
 
     /**
@@ -439,26 +470,17 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         string $path,
         $body,
     ): array {
-        [
-            'access_mode' => $visibility,
-            'bytes' => $size,
-            'created_at' => $createdAt,
-            'etag' => $etag,
-            'version' => $version,
-            'version_id' => $versionId,
-        ] = $response->getArrayCopy();
-
         return [
             'contents' => $body,
-            'etag' => $etag,
+            'etag' => Arr::get($response, 'etag'),
             'mimetype' => Util::guessMimeType($path, $body),
             'path' => $path,
-            'size' => $size,
-            'timestamp' => strtotime($createdAt),
+            'size' => Arr::get($response, 'bytes'),
+            'timestamp' => strtotime(Arr::get($response, 'created_at')),
             'type' => 'file',
-            'version' => $version,
-            'versionid' => $versionId,
-            'visibility' => $visibility === 'public' ? 'public' : 'private',
+            'version' => Arr::get($response, 'version'),
+            'versionid' => Arr::get($response, 'version_id'),
+            'visibility' => Arr::get($response, 'access_mode') === 'public' ? 'public' : 'private',
         ];
     }
 }

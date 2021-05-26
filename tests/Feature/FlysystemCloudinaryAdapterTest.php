@@ -208,4 +208,52 @@ class FlysystemCloudinaryAdapterTest extends TestCase
 
         $this->assertFalse($bool);
     }
+
+    /** @test */
+    public function it_can_read()
+    {
+        $publicId = 'file-read-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $meta = $this->adapter->read($publicId);
+
+        $this->assertIsString($meta['contents']);
+        $this->assertArrayNotHasKey('stream', $meta);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_can_read_stream()
+    {
+        $publicId = 'file-read-stream' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $meta = $this->adapter->readStream($publicId);
+
+        $this->assertIsString($meta['stream']);
+        $this->assertArrayNotHasKey('contents', $meta);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_does_not_read_if_file_is_not_found()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $bool = $this->adapter->read($publicId);
+
+        $this->assertFalse($bool);
+    }
+
+    /** @test */
+    public function it_does_not_read_stream_if_file_is_not_found()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $bool = $this->adapter->readStream($publicId);
+
+        $this->assertFalse($bool);
+    }
 }
