@@ -137,19 +137,15 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter copy');
 
-        $object = $this->read($path);
+        $metaRead = $this->readObject($path);
 
-        if ($object === false) {
+        if ($metaRead === false) {
             return false;
         }
 
-        $write = $this->write(
-            $newpath,
-            $object['contents'],
-            resolve(Config::class),
-        );
+        $metaUpload = $this->upload($newpath, $metaRead['contents']);
 
-        if ($write === false) {
+        if ($metaUpload === false) {
             return false;
         }
 

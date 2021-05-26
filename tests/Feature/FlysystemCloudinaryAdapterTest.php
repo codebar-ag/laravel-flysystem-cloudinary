@@ -141,7 +141,27 @@ class FlysystemCloudinaryAdapterTest extends TestCase
     /** @test */
     public function it_can_copy()
     {
-        $this->markTestSkipped('We need to test read first');
+        $path = 'file-old-copy-' . rand();
+        $newPath = 'file-new-copy-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($path, $fakeImage, new Config());
+
+        $bool = $this->adapter->copy($path, $newPath);
+
+        $this->assertTrue($bool);
+        $this->adapter->delete($path); // cleanup
+        $this->adapter->delete($newPath); // cleanup
+    }
+
+    /** @test */
+    public function it_does_not_copy_if_file_is_not_found()
+    {
+        $path = 'file-does-not-exist';
+        $newPath = 'file-copied';
+
+        $bool = $this->adapter->copy($path, $newPath);
+
+        $this->assertFalse($bool);
     }
 
     /** @test */
