@@ -163,16 +163,18 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter delete');
 
-        try {
-            $response = $this
-                ->cloudinary
-                ->uploadApi()
-                ->destroy($path);
-        } catch (NotFound) {
-            return false;
-        }
+        $response = $this
+            ->cloudinary
+            ->uploadApi()
+            ->destroy($path);
 
         event(new FlysystemCloudinaryResponseLog($response));
+
+        ['result' => $result] = $response->getArrayCopy();
+
+        if ($result === 'not found') {
+            return false;
+        }
 
         return true;
     }

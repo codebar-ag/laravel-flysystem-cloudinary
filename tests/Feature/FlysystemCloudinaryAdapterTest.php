@@ -137,4 +137,32 @@ class FlysystemCloudinaryAdapterTest extends TestCase
         $this->adapter->delete($path); // cleanup
         $this->adapter->delete($newPath); // cleanup
     }
+
+    /** @test */
+    public function it_can_copy()
+    {
+        $this->markTestSkipped('We need to test read first');
+    }
+
+    /** @test */
+    public function it_can_delete()
+    {
+        $publicId = 'file-delete-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $bool = $this->adapter->delete($publicId);
+
+        $this->assertTrue($bool);
+    }
+
+    /** @test */
+    public function it_does_not_delete_if_file_is_not_found()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $bool = $this->adapter->delete($publicId);
+
+        $this->assertFalse($bool);
+    }
 }
