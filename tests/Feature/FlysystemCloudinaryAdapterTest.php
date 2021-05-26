@@ -38,7 +38,7 @@ class FlysystemCloudinaryAdapterTest extends TestCase
     /** @test */
     public function it_can_write()
     {
-        $publicId = 'file-name-' . rand();
+        $publicId = 'file-write-' . rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->write($publicId, $fakeImage, new Config());
@@ -50,7 +50,7 @@ class FlysystemCloudinaryAdapterTest extends TestCase
     /** @test */
     public function it_can_write_stream()
     {
-        $publicId = 'file-name-' . rand();
+        $publicId = 'file-write-stream-' . rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->writeStream($publicId, $fakeImage, new Config());
@@ -62,7 +62,7 @@ class FlysystemCloudinaryAdapterTest extends TestCase
     /** @test */
     public function it_can_update()
     {
-        $publicId = 'file-name-' . rand();
+        $publicId = 'file-update-' . rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->update($publicId, $fakeImage, new Config());
@@ -74,7 +74,7 @@ class FlysystemCloudinaryAdapterTest extends TestCase
     /** @test */
     public function it_can_update_stream()
     {
-        $publicId = 'file-name-' . rand();
+        $publicId = 'file-update-stream-' . rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->updateStream($publicId, $fakeImage, new Config());
@@ -95,5 +95,46 @@ class FlysystemCloudinaryAdapterTest extends TestCase
         $this->assertIsInt($meta['version']);
         $this->assertIsString($meta['versionid']);
         $this->assertSame('public', $meta['visibility']);
+    }
+
+    /** @test */
+    public function it_can_rename()
+    {
+        $path = 'file-old-path-' . rand();
+        $newPath = 'file-new-path-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($path, $fakeImage, new Config());
+
+        $bool = $this->adapter->rename($path, $newPath);
+
+        $this->assertTrue($bool);
+        $this->adapter->delete($newPath); // cleanup
+    }
+
+    /** @test */
+    public function it_does_not_rename_if_file_is_not_found()
+    {
+        $path = 'file-does-not-exist';
+        $newPath = 'file-renamed';
+
+        $bool = $this->adapter->rename($path, $newPath);
+
+        $this->assertFalse($bool);
+    }
+
+    /** @test */
+    public function it_does_not_rename_if_new_path_already_exists()
+    {
+        $path = 'file-rename-' . rand();
+        $newPath = 'file-already-exists-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($path, $fakeImage, new Config());
+        $this->adapter->write($newPath, $fakeImage, new Config());
+
+        $bool = $this->adapter->rename($path, $newPath);
+
+        $this->assertFalse($bool);
+        $this->adapter->delete($path); // cleanup
+        $this->adapter->delete($newPath); // cleanup
     }
 }

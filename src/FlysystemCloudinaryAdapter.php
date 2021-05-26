@@ -4,6 +4,7 @@ namespace CodebarAg\FlysystemCloudinary;
 
 use Cloudinary\Api\ApiResponse;
 use Cloudinary\Api\Exception\ApiError;
+use Cloudinary\Api\Exception\BadRequest;
 use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
@@ -109,12 +110,16 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter rename');
 
+        $options = [
+            'invalidate' => true,
+        ];
+
         try {
             $response = $this
                 ->cloudinary
                 ->uploadApi()
-                ->rename($path, $newpath);
-        } catch (NotFound) {
+                ->rename($path, $newpath, $options);
+        } catch (NotFound | BadRequest) {
             return false;
         }
 
