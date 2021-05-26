@@ -6,6 +6,7 @@ use Cloudinary\Api\ApiResponse;
 use Cloudinary\Api\Exception\ApiError;
 use Cloudinary\Api\Exception\BadRequest;
 use Cloudinary\Api\Exception\NotFound;
+use Cloudinary\Api\Exception\RateLimited;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use League\Flysystem\Adapter\AbstractAdapter;
@@ -191,7 +192,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
                 ->cloudinary
                 ->adminApi()
                 ->deleteFolder($dirname);
-        } catch (ApiError) {
+        } catch (ApiError) { // RateLimited?
             return false;
         }
 
@@ -207,19 +208,21 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter createDir');
 
+        $dirname = trim($dirname, '/');
+
         try {
             $response = $this
                 ->cloudinary
                 ->adminApi()
                 ->createFolder($dirname);
-        } catch (ApiError) {
+        } catch (RateLimited) {
             return false;
         }
 
         event(new FlysystemCloudinaryResponseLog($response));
 
         return [
-            'path' => trim($dirname, '/'),
+            'path' => $dirname,
             'type' => 'dir',
         ];
     }

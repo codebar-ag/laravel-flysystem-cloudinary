@@ -165,4 +165,24 @@ class FlysystemCloudinaryAdapterTest extends TestCase
 
         $this->assertFalse($bool);
     }
+
+    /** @test */
+    public function it_can_delete_a_directory()
+    {
+        $this->markTestSkipped('We need to delete files first');
+    }
+
+    /** @test */
+    public function it_can_create_a_directory()
+    {
+        $directory = 'directory-' . rand();
+
+        $meta = $this->adapter->createDir($directory, new Config());
+
+        $this->assertSame([
+            'path' => $directory,
+            'type' => 'dir',
+        ], $meta);
+        $this->adapter->deleteDir($directory); // cleanup
+    }
 }
