@@ -73,10 +73,12 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     protected function upload(string $path, $body): array | false
     {
-        $tmpFile = tmpfile();
+        if (is_string($body)) {
+            $tempFile = tmpfile();
 
-        if (fwrite($tmpFile, $body) === false) {
-            return false;
+            if (fwrite($tempFile, $body) === false) {
+                return false;
+            }
         }
 
         $path = trim($path, '/');
@@ -93,7 +95,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             $response = $this
                 ->cloudinary
                 ->uploadApi()
-                ->upload($tmpFile, $options);
+                ->upload($tempFile ?? $body, $options);
         } catch (ApiError) {
             return false;
         }
@@ -280,8 +282,19 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             return false;
         }
 
-        $meta['stream'] = $meta['contents'];
+        $tempFile = tmpfile();
+
+        if (fwrite($tempFile, $meta['contents']) === false) {
+            return false;
+        }
+
+        if (rewind($tempFile) === false) {
+            return false;
+        }
+
         unset($meta['contents']);
+
+        $meta['stream'] = $tempFile;
 
         return $meta;
     }
@@ -392,7 +405,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         return $this->getMetadata($path);
     }
 
-    public function getUrl(string $path): string
+    public function getUrl(string $path): string | false
     {
         ray('adapter getUrl');
 
@@ -400,11 +413,15 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             'type' => 'upload',
         ];
 
-        /** @var ApiResponse $response */
-        $response = $this
-            ->cloudinary
-            ->uploadApi()
-            ->explicit($path, $options);
+        try {
+            /** @var ApiResponse $response */
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->explicit($path, $options);
+        } catch (NotFound) {
+            return false;
+        }
 
         event(new FlysystemCloudinaryResponseLog($response));
 
