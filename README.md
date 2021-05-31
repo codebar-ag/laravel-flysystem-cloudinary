@@ -56,7 +56,7 @@ CLOUDINARY_API_SECRET=my-api-secret
 You can publish the config file with:
 
 ```shell
-php artisan vendor:publish --tag="flysystem-cloudinary"
+php artisan vendor:publish --tag="flysystem-cloudinary-config"
 ```
 
 This is the contents of the published config file:
