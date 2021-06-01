@@ -122,19 +122,13 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter rename');
 
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
+        $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
+
         $options = [
             'invalidate' => true,
         ];
-
-        $path = trim($path, '/');
-        $newpath = trim($newpath, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $path = "{$folder}/$path";
-            $newpath = "{$folder}/$newpath";
-        }
 
         try {
             $response = $this
@@ -157,15 +151,9 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter copy');
 
-        $path = trim($path, '/');
-        $newpath = trim($newpath, '/');
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $path = "{$folder}/$path";
-            $newpath = "{$folder}/$newpath";
-        }
+        $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
 
         $metaRead = $this->readObject($path);
 
@@ -191,13 +179,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter delete');
 
-        $path = trim($path, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $path = "{$folder}/$path";
-        }
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $response = $this
             ->cloudinary
@@ -222,13 +204,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter deleteDir');
 
-        $dirname = trim($dirname, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $dirname = "{$folder}/$dirname";
-        }
+        $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
 
         try {
             $response = $this
@@ -251,13 +227,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter createDir');
 
-        $dirname = trim($dirname, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $dirname = "{$folder}/$dirname";
-        }
+        $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
 
         try {
             $response = $this
@@ -285,17 +255,11 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter has');
 
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
         $options = [
             'type' => 'upload',
         ];
-
-        $path = trim($path, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $path = "{$folder}/$path";
-        }
 
         try {
             $response = $this
@@ -318,13 +282,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter read');
 
-        $path = trim($path, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $path = "{$folder}/$path";
-        }
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $meta = $this->readObject($path);
 
@@ -342,13 +300,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter readStream');
 
-        $path = trim($path, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $path = "{$folder}/$path";
-        }
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $meta = $this->readObject($path);
 
@@ -380,17 +332,11 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function readObject(string $path): array | bool
     {
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
         $options = [
             'type' => 'upload',
         ];
-
-        $path = trim($path, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $path = "{$folder}/$path";
-        }
 
         try {
             /** @var ApiResponse $response */
@@ -422,13 +368,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter listContents');
 
-        $directory = trim($directory, '/');
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $directory = "{$folder}/$directory";
-        }
+        $directory = $this->ensureFolderIsPrefixed(trim($directory, '/'));
 
         $options = [
             'type' => 'upload',
@@ -499,15 +439,11 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter getUrl');
 
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
         $options = [
             'type' => 'upload',
         ];
-
-        if (config('flysystem-cloudinary.folder')) {
-            $folder = trim(config('flysystem-cloudinary.folder'), '/');
-
-            $path = "{$folder}/$path";
-        }
 
         try {
             /** @var ApiResponse $response */
@@ -524,6 +460,17 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         ['url' => $url] = $response->getArrayCopy();
 
         return $url;
+    }
+
+    protected function ensureFolderIsPrefixed(string $path): string
+    {
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            return "{$folder}/$path";
+        }
+
+        return $path;
     }
 
     /**
