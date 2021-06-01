@@ -64,7 +64,7 @@ Storage::disk('cloudinary')->put('cat.jpg', $contents);
 This will generate following URL with double extensions:
 
 ```
-https://res.cloudinary.com/my-cloud-name/image/upload/v1122334455/cat.jpg.jpg
+https://res.cloudinary.com/my-cloud-name/image/upload/v1/cat.jpg.jpg
 ```
 
 To prevent this you should store your images without the file extension:
@@ -72,13 +72,13 @@ To prevent this you should store your images without the file extension:
 ```php
 use Illuminate\Support\Facades\Storage;
 
-Storage::disk('cloudinary')->put(sha1('cat.jpg'), $contents);
+Storage::disk('cloudinary')->put('cat', $contents);
 ```
 
 This is now much better:
 
 ```
-https://res.cloudinary.com/my-cloud-name/image/upload/v1122334455/8939a1bcee2ff2d505ed1929cddcdd27442d61df.jpg
+https://res.cloudinary.com/my-cloud-name/image/upload/v1/cat.jpg
 ```
 
 ### 🪐 How to use with Nova
@@ -90,7 +90,7 @@ of the `File` field:
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Image;
 
-Image::make('Image', 'image')
+Image::make('Image')
     ->disk('cloudinary')
     ->storeAs(function (Request $request) {
         return sha1($request->image->getClientOriginalName());
@@ -99,7 +99,41 @@ Image::make('Image', 'image')
 
 ## 🗂 How to use folder prefix
 
-TBD.
+Imagine the following example. We have different clients but want to store the
+assets in the same Cloudinary account. Normally we have to prefix every path
+with the correct client folder name. Fortunately, the package helps us here.
+We can configure a folder in our environment file like this:
+
+```shell
+CLOUDINARY_FOLDER=client_cat
+```
+
+Now all our assets will be prefixed with the `client_cat/` folder. When we
+store following image:
+
+```php
+use Illuminate\Support\Facades\Storage;
+
+Storage::disk('cloudinary')->put('meow', $contents);
+```
+
+It will produce following URL:
+
+```
+https://res.cloudinary.com/my-cloud-name/image/upload/v1/client_cat/meow.jpg
+```
+
+In the Media Library it is stored in `client_cat/meow` and you can retrieve
+the image with `meow`:
+
+```
+use Illuminate\Support\Facades\Storage;
+
+Storage::disk('cloudinary')->getUrl('meow');
+```
+
+This should increase the trust to store and retrieve your assets from the
+correct folder.
 
 ## 🔧 Configuration file
 
