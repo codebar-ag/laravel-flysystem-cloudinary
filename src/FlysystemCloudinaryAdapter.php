@@ -91,6 +91,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             'unique_filename' => false,
         ];
 
+        if (config('flysystem-cloudinary.folder')) {
+            $options['folder'] = config('flysystem-cloudinary.folder');
+        }
+
+        if (config('flysystem-cloudinary.upload_preset')) {
+            $options['upload_preset'] = config('flysystem-cloudinary.upload_preset');
+        }
+
         try {
             $response = $this
                 ->cloudinary
@@ -118,6 +126,16 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             'invalidate' => true,
         ];
 
+        $path = trim($path, '/');
+        $newpath = trim($newpath, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $path = "{$folder}/$path";
+            $newpath = "{$folder}/$newpath";
+        }
+
         try {
             $response = $this
                 ->cloudinary
@@ -138,6 +156,16 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     public function copy($path, $newpath): bool
     {
         ray('adapter copy');
+
+        $path = trim($path, '/');
+        $newpath = trim($newpath, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $path = "{$folder}/$path";
+            $newpath = "{$folder}/$newpath";
+        }
 
         $metaRead = $this->readObject($path);
 
@@ -163,6 +191,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter delete');
 
+        $path = trim($path, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $path = "{$folder}/$path";
+        }
+
         $response = $this
             ->cloudinary
             ->uploadApi()
@@ -186,6 +222,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter deleteDir');
 
+        $dirname = trim($dirname, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $dirname = "{$folder}/$dirname";
+        }
+
         try {
             $response = $this
                 ->cloudinary
@@ -208,6 +252,12 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         ray('adapter createDir');
 
         $dirname = trim($dirname, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $dirname = "{$folder}/$dirname";
+        }
 
         try {
             $response = $this
@@ -239,6 +289,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             'type' => 'upload',
         ];
 
+        $path = trim($path, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $path = "{$folder}/$path";
+        }
+
         try {
             $response = $this
                 ->cloudinary
@@ -260,6 +318,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         ray('adapter read');
 
+        $path = trim($path, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $path = "{$folder}/$path";
+        }
+
         $meta = $this->readObject($path);
 
         if ($meta === false) {
@@ -275,6 +341,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     public function readStream($path): array | false
     {
         ray('adapter readStream');
+
+        $path = trim($path, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $path = "{$folder}/$path";
+        }
 
         $meta = $this->readObject($path);
 
@@ -310,6 +384,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             'type' => 'upload',
         ];
 
+        $path = trim($path, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $path = "{$folder}/$path";
+        }
+
         try {
             /** @var ApiResponse $response */
             $response = $this
@@ -339,6 +421,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     public function listContents($directory = '', $recursive = false): array
     {
         ray('adapter listContents');
+
+        $directory = trim($directory, '/');
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $directory = "{$folder}/$directory";
+        }
 
         $options = [
             'type' => 'upload',
@@ -412,6 +502,12 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         $options = [
             'type' => 'upload',
         ];
+
+        if (config('flysystem-cloudinary.folder')) {
+            $folder = trim(config('flysystem-cloudinary.folder'), '/');
+
+            $path = "{$folder}/$path";
+        }
 
         try {
             /** @var ApiResponse $response */

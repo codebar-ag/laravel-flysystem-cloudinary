@@ -51,6 +51,56 @@ CLOUDINARY_API_KEY=my-api-key
 CLOUDINARY_API_SECRET=my-api-secret
 ```
 
+## 🏗 File extension problem
+
+Let's look at the following example:
+
+```php
+use Illuminate\Support\Facades\Storage;
+
+Storage::disk('cloudinary')->put('cat.jpg', $contents);
+```
+
+This will generate following URL with double extensions:
+
+```
+https://res.cloudinary.com/my-cloud-name/image/upload/v1122334455/cat.jpg.jpg
+```
+
+To prevent this you should store your images without the file extension:
+
+```php
+use Illuminate\Support\Facades\Storage;
+
+Storage::disk('cloudinary')->put(sha1('cat.jpg'), $contents);
+```
+
+This is now much better:
+
+```
+https://res.cloudinary.com/my-cloud-name/image/upload/v1122334455/8939a1bcee2ff2d505ed1929cddcdd27442d61df.jpg
+```
+
+### 🪐 How to use with Nova
+
+To customize the name of the stored file, you may use the `storeAs` methods
+of the `File` field:
+
+```php
+use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Image;
+
+Image::make('Image', 'image')
+    ->disk('cloudinary')
+    ->storeAs(function (Request $request) {
+        return sha1($request->image->getClientOriginalName());
+    }),
+```
+
+## 🗂 How to use folder prefix
+
+TBD.
+
 ## 🔧 Configuration file
 
 You can publish the config file with:
