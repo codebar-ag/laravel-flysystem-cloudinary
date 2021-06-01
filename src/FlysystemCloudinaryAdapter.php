@@ -330,10 +330,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#explicit_method
      */
-    public function readObject(string $path): array | bool
+    protected function readObject(string $path): array | bool
     {
-        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
-
         $options = [
             'type' => 'upload',
         ];
