@@ -455,7 +455,14 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
 
         event(new FlysystemCloudinaryResponseLog($response));
 
-        ['url' => $url] = $response->getArrayCopy();
+        [
+            'url' => $url,
+            'secure_url' => $secure_url,
+        ] = $response->getArrayCopy();
+
+        if (config('flysystem-cloudinary.secure_url')) {
+            return $secure_url;
+        }
 
         return $url;
     }

@@ -34,7 +34,7 @@ configuration:
             'api_key' => env('CLOUDINARY_API_KEY'),
             'api_secret' => env('CLOUDINARY_API_SECRET'),
             'url' => [
-                'secure' => env('CLOUDINARY_URL_SECURE', true),
+                'secure' => (bool) env('CLOUDINARY_SECURE_URL', true),
             ],
         ],
 

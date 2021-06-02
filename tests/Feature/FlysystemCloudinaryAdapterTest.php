@@ -252,7 +252,7 @@ class FlysystemCloudinaryAdapterTest extends TestCase
 
         $meta = $this->adapter->readStream($publicId);
 
-        $this->assertIsString($meta['stream']);
+        $this->assertIsResource($meta['stream']);
         $this->assertArrayNotHasKey('contents', $meta);
         $this->adapter->delete($publicId); // cleanup
     }
@@ -400,6 +400,7 @@ class FlysystemCloudinaryAdapterTest extends TestCase
 
         $url = $this->adapter->getUrl($publicId);
 
+        $this->assertStringStartsWith('https://', $url);
         $this->assertStringContainsString($publicId, $url);
         $this->adapter->delete($publicId); // cleanup
     }
