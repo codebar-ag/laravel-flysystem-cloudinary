@@ -176,6 +176,19 @@ return [
 
     'folder' => env('CLOUDINARY_FOLDER'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cloudinary Secure URL
+    |--------------------------------------------------------------------------
+    |
+    | This value determines that the asset delivery is forced to use HTTPS
+    | URLs. If disabled all your assets will be delivered as HTTP URLs.
+    | Please do not use unsecure URLs in your production application.
+    |
+    */
+
+    'secure_url' => (bool) env('CLOUDINARY_SECURE_URL', true),
+
 ];
 ```
 
