@@ -84,7 +84,7 @@ https://res.cloudinary.com/my-cloud-name/image/upload/v1/cat.jpg
 ### 🪐 How to use with Nova
 
 To customize the name of the stored file, you may use the `storeAs` methods
-of the `File` field:
+of the `Image` field:
 
 ```php
 use Illuminate\Http\Request;
