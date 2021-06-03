@@ -1,5 +1,10 @@
 <img src="https://banners.beyondco.de/Laravel%20Flysystem%20Cloudinary.png?theme=light&packageManager=composer+require&packageName=codebar-ag%2Flaravel-flysystem-cloudinary&pattern=circuitBoard&style=style_2&description=An+opinionated+way+to+integrate+Cloudinary+with+the+Laravel+filesystem&md=1&showWatermark=0&fontSize=150px&images=cloud&widths=500&heights=500">
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/codebar-ag/laravel-flysystem-cloudinary.svg?style=flat-square)](https://packagist.org/packages/codebar-ag/laravel-flysystem-cloudinary)
+[![Total Downloads](https://img.shields.io/packagist/dt/codebar-ag/laravel-flysystem-cloudinary.svg?style=flat-square)](https://packagist.org/packages/codebar-ag/laravel-flysystem-cloudinary)
+[![run-tests](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml/badge.svg)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml)
+[![Check & fix styling](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/php-cs-fixer.yml/badge.svg)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/php-cs-fixer.yml)
+
 ## 💡 What is Cloudinary?
 
 Cloudinary is basically a fantastic way to store and serve assets like images
