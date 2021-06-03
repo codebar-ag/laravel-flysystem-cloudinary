@@ -16,6 +16,7 @@ additional parameters to your url 😉
 
 - PHP: `^8.0`
 - Laravel: `^8.12`
+- league/flysystem: `^1.1` (default in Laravel 8)
 - Cloudinary Account
 
 ## ⚙️ Installation
