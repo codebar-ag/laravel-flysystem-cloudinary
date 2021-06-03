@@ -246,7 +246,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_read_stream()
     {
-        $publicId = 'file-read-stream' . rand();
+        $publicId = 'file-read-stream-' . rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
