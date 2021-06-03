@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-cloudinary` will be documented in this file.
 
+## 1.0.0 - 2021-06-03
+
+- Stable release
+
 ## 0.3.0 - 2021-06-02
 
 - ⚠️ BREAKING CHANGE: Renamed environment variable
