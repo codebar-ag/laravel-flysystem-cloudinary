@@ -194,21 +194,6 @@ return [
 
 ## 🚧 Testing
 
-Copy your own phpunit.xml-file.
-```shell
-cp phpunit.xml.dist phpunit.xml
-```
-
-Modify environment variables in the phpunit.xml-file:
-```xml
-<php>
-    <env name="FILESYSTEM_DRIVER" value="cloudinary"/>
-    <env name="CLOUDINARY_CLOUD_NAME" value="my-cloud-name"/>
-    <env name="CLOUDINARY_API_KEY" value="my-api-key"/>
-    <env name="CLOUDINARY_API_SECRET" value="my-api-secret"/>
-</php>
-```
-
 Run the tests:
 ```shell
 composer test
@@ -229,6 +214,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 ## 🙏 Credits
 
 - [Ruslan Steiger](https://github.com/SuddenlyRust)
+- [Sebastian Fix](https://github.com/StanBarrows)
 - [All Contributors](../../contributors)
 - [Skeleton Repository from Spatie](https://github.com/spatie/package-skeleton-laravel)
 - [Laravel Package Training from Spatie](https://spatie.be/videos/laravel-package-training)

@@ -1,6 +1,6 @@
 <?php
 
-namespace CodebarAg\FlysystemCloudinary\Tests\Feature;
+namespace CodebarAg\FlysystemCloudinary\Tests\Integration;
 
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
@@ -8,7 +8,8 @@ use CodebarAg\FlysystemCloudinary\Tests\TestCase;
 use Illuminate\Http\Testing\File;
 use League\Flysystem\Config;
 
-class FlysystemCloudinaryAdapterTest extends TestCase
+/** @group Integration */
+class CloudinaryTest extends TestCase
 {
     protected FlysystemCloudinaryAdapter $adapter;
 
@@ -27,13 +28,6 @@ class FlysystemCloudinaryAdapterTest extends TestCase
 
         $this->adapter = new FlysystemCloudinaryAdapter($cloudinary);
     }
-
-//    protected function getPackageProviders($app): array
-//    {
-//        return [
-//            FlysystemCloudinaryServiceProvider::class,
-//        ];
-//    }
 
     /** @test */
     public function it_can_write()
