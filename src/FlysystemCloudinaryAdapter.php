@@ -31,8 +31,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function write($path, $contents, Config $config): array | false
     {
-        ray('adapter write');
-
         return $this->upload($path, $contents);
     }
 
@@ -41,8 +39,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function writeStream($path, $resource, Config $config): array | false
     {
-        ray('adapter writeStream');
-
         return $this->upload($path, $resource);
     }
 
@@ -51,8 +47,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function update($path, $contents, Config $config): array | false
     {
-        ray('adapter upload');
-
         return $this->upload($path, $contents);
     }
 
@@ -61,8 +55,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function updateStream($path, $resource, Config $config): array | false
     {
-        ray('adapter updateStream');
-
         return $this->upload($path, $resource);
     }
 
@@ -122,8 +114,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function rename($path, $newpath): bool
     {
-        ray('adapter rename');
-
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
@@ -151,8 +141,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function copy($path, $newpath): bool
     {
-        ray('adapter copy');
-
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
@@ -179,8 +167,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function delete($path): bool
     {
-        ray('adapter delete');
-
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $response = $this
@@ -204,8 +190,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function deleteDir($dirname): bool
     {
-        ray('adapter deleteDir');
-
         $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
 
         $files = $this->listContents($dirname);
@@ -233,8 +217,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function createDir($dirname, Config $config): array | false
     {
-        ray('adapter createDir');
-
         $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
 
         try {
@@ -261,8 +243,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function has($path): array | bool | null
     {
-        ray('adapter has');
-
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $options = [
@@ -288,8 +268,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function read($path): array | false
     {
-        ray('adapter read');
-
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $meta = $this->readObject($path);
@@ -306,8 +284,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function readStream($path): array | false
     {
-        ray('adapter readStream');
-
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $meta = $this->readObject($path);
@@ -372,8 +348,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function listContents($directory = '', $recursive = false): array
     {
-        ray('adapter listContents');
-
         $directory = $this->ensureFolderIsPrefixed(trim($directory, '/'));
 
         $options = [
@@ -402,8 +376,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getMetadata($path): array | false
     {
-        ray('adapter getMetadata');
-
         $meta = $this->readObject($path);
 
         if ($meta === false) {
@@ -418,8 +390,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getSize($path): array | false
     {
-        ray('adapter getSize');
-
         return $this->getMetadata($path);
     }
 
@@ -428,8 +398,6 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getMimetype($path): array | false
     {
-        ray('adapter getMimetype');
-
         return $this->getMetadata($path);
     }
 
@@ -438,15 +406,11 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     public function getTimestamp($path): array | false
     {
-        ray('adapter getTimestamp');
-
         return $this->getMetadata($path);
     }
 
     public function getUrl(string $path): string | false
     {
-        ray('adapter getUrl');
-
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $options = [
