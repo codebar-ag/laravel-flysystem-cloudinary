@@ -503,7 +503,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         return [
             'contents' => $body,
             'etag' => Arr::get($response, 'etag'),
-            'mimetype' => Util::guessMimeType($path, $body),
+            'mimetype' => Util::guessMimeType($path, $body) ?? 'text/plain',
             'path' => $path,
             'size' => Arr::get($response, 'bytes'),
             'timestamp' => strtotime(Arr::get($response, 'created_at')),
