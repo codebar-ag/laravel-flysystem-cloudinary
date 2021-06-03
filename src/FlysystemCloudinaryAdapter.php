@@ -206,12 +206,18 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
 
         $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
 
+        $files = $this->listContents($dirname);
+
+        foreach ($files as ['path' => $path]) {
+            $this->delete($path);
+        }
+
         try {
             $response = $this
                 ->cloudinary
                 ->adminApi()
                 ->deleteFolder($dirname);
-        } catch (ApiError) { // RateLimited?
+        } catch (ApiError | RateLimited) {
             return false;
         }
 

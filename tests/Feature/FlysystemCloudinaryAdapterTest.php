@@ -189,7 +189,13 @@ class FlysystemCloudinaryAdapterTest extends TestCase
     /** @test */
     public function it_can_delete_a_directory()
     {
-        $this->markTestSkipped('We need to delete files first');
+        $publicId = 'delete_dir/file-' . rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $bool = $this->adapter->deleteDir('delete_dir');
+
+        $this->assertTrue($bool);
     }
 
     /** @test */
