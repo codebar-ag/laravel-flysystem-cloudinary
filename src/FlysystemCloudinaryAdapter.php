@@ -9,7 +9,9 @@ use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Api\Exception\RateLimited;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
@@ -354,11 +356,11 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
 
         event(new FlysystemCloudinaryResponseLog($response));
 
-        ['url' => $url] = $response->getArrayCopy();
+        ['secure_url' => $url] = $response->getArrayCopy();
 
-        $contents = file_get_contents($url);
-
-        if ($contents === false) {
+        try {
+            $contents = Http::get($url)->throw()->body();
+        } catch (RequestException) {
             return false;
         }
 
@@ -387,6 +389,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         } catch (RateLimited) {
             return [];
         }
+
+        event(new FlysystemCloudinaryResponseLog($response));
 
         return array_map(function (array $resource) {
             return $this->normalizeResponse($resource, $resource['public_id']);
