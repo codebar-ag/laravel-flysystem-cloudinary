@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-cloudinary` will be documented in this file.
 
+## 1.0.1 - 2021-06-23
+
+- 🐛 Bug Fix: List folders
+
 ## 1.0.0 - 2021-06-03
 
 - Stable release

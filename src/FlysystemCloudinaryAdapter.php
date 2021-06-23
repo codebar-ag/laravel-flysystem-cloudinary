@@ -356,19 +356,35 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         ];
 
         try {
-            $response = $this
+            $responseFiles = $this
                 ->cloudinary
                 ->adminApi()
                 ->assets($options);
-        } catch (RateLimited) {
+
+            $responseDirectories = $this
+                ->cloudinary
+                ->adminApi()
+                ->subFolders($directory);
+        } catch (RateLimited | ApiError) {
             return [];
         }
 
-        event(new FlysystemCloudinaryResponseLog($response));
+        event(new FlysystemCloudinaryResponseLog($responseFiles));
+        event(new FlysystemCloudinaryResponseLog($responseDirectories));
 
-        return array_map(function (array $resource) {
+        $files = array_map(function (array $resource) {
             return $this->normalizeResponse($resource, $resource['public_id']);
-        }, $response->getArrayCopy()['resources']);
+        }, $responseFiles->getArrayCopy()['resources']);
+
+        $folders = array_map(function (array $resource) {
+            return [
+                'type' => 'dir',
+                'path' => $resource['path'],
+                'name' => $resource['name'],
+            ];
+        }, $responseDirectories->getArrayCopy()['folders']);
+
+        return [...$files, ...$folders];
     }
 
     /**
