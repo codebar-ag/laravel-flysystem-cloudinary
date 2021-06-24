@@ -397,6 +397,6 @@ class AdapterTest extends TestCase
         $url = $adapter->getUrl('::path::');
 
         $this->assertSame('::secure-url::', $url);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
+        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 2);
     }
 }

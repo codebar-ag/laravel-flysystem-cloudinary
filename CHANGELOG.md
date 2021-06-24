@@ -2,6 +2,11 @@
 
 All notable changes to `laravel-cloudinary` will be documented in this file.
 
+## 1.0.2 - 2021-06-24
+
+- 🐛 Bug Fix: Folder prefix working correct now
+- 🐛 Bug Fix: List files now works with raw and image files
+
 ## 1.0.1 - 2021-06-23
 
 - 🐛 Bug Fix: List folders

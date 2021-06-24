@@ -246,20 +246,11 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
-        $options = [
-            'type' => 'upload',
-        ];
-
         try {
-            $response = $this
-                ->cloudinary
-                ->uploadApi()
-                ->explicit($path, $options);
+            $this->explicit($path);
         } catch (NotFound) {
             return false;
         }
-
-        event(new FlysystemCloudinaryResponseLog($response));
 
         return true;
     }
@@ -317,21 +308,11 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      */
     protected function readObject(string $path): array | bool
     {
-        $options = [
-            'type' => 'upload',
-        ];
-
         try {
-            /** @var ApiResponse $response */
-            $response = $this
-                ->cloudinary
-                ->uploadApi()
-                ->explicit($path, $options);
+            $response = $this->explicit($path);
         } catch (NotFound) {
             return false;
         }
-
-        event(new FlysystemCloudinaryResponseLog($response));
 
         ['secure_url' => $url] = $response->getArrayCopy();
 
@@ -461,16 +442,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
-        $options = [
-            'type' => 'upload',
-        ];
-
         try {
-            /** @var ApiResponse $response */
-            $response = $this
-                ->cloudinary
-                ->uploadApi()
-                ->explicit($path, $options);
+            $response = $this->explicit($path);
         } catch (NotFound) {
             return false;
         }
@@ -487,6 +460,53 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         }
 
         return $url;
+    }
+
+    protected function explicit(string $path): ApiResponse
+    {
+        $options = [
+            'type' => 'upload',
+        ];
+
+        try {
+            $options['resource_type'] = 'image';
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->explicit($path, $options);
+
+            event(new FlysystemCloudinaryResponseLog($response));
+
+            return $response;
+        } catch (NotFound) {
+        }
+
+        try {
+            $options['resource_type'] = 'raw';
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->explicit($path, $options);
+
+            event(new FlysystemCloudinaryResponseLog($response));
+
+            return $response;
+        } catch (NotFound) {
+        }
+
+        try {
+            $options['resource_type'] = 'video';
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->explicit($path, $options);
+
+            event(new FlysystemCloudinaryResponseLog($response));
+
+            return $response;
+        } catch (NotFound $e) {
+            throw $e;
+        }
     }
 
     protected function ensureFolderIsPrefixed(string $path): string

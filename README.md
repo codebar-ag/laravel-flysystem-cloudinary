@@ -141,6 +141,18 @@ Storage::disk('cloudinary')->getUrl('meow');
 This should increase the trust to store and retrieve your assets from the
 correct folder.
 
+## 🔋 Rate limit gotchas
+
+All files in Cloudinary are stored with a resource type. There are three kinds
+of it: `image`, `raw` and `video`. For example if we want to check if a video
+exists, we need to make up to 3 requests. Every type needs to be checked on
+their own with a separate request.
+
+Keep this in mind because the admin API is rate limited to 500 calls per hour.
+
+The package does check in following sequence:
+- `image` ➡️ `raw` ➡️ `video`
+
 ## 🔧 Configuration file
 
 You can publish the config file with:
