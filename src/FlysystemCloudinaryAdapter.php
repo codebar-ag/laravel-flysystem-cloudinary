@@ -12,6 +12,7 @@ use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
@@ -353,10 +354,24 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         $options = [
             'type' => 'upload',
             'prefix' => $directory,
+            'max_results' => 500,
         ];
 
         try {
-            $responseFiles = $this
+            $options['resource_type'] = 'raw';
+            $responseRawFiles = $this
+                ->cloudinary
+                ->adminApi()
+                ->assets($options);
+
+            $options['resource_type'] = 'image';
+            $responseImageFiles = $this
+                ->cloudinary
+                ->adminApi()
+                ->assets($options);
+
+            $options['resource_type'] = 'video';
+            $responseVideoFiles = $this
                 ->cloudinary
                 ->adminApi()
                 ->assets($options);
@@ -369,22 +384,39 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             return [];
         }
 
-        event(new FlysystemCloudinaryResponseLog($responseFiles));
+        event(new FlysystemCloudinaryResponseLog($responseRawFiles));
+        event(new FlysystemCloudinaryResponseLog($responseImageFiles));
+        event(new FlysystemCloudinaryResponseLog($responseVideoFiles));
         event(new FlysystemCloudinaryResponseLog($responseDirectories));
 
-        $files = array_map(function (array $resource) {
+        $rawFiles = array_map(function (array $resource) {
             return $this->normalizeResponse($resource, $resource['public_id']);
-        }, $responseFiles->getArrayCopy()['resources']);
+        }, $responseRawFiles->getArrayCopy()['resources']);
+
+        $imageFiles = array_map(function (array $resource) {
+            return $this->normalizeResponse($resource, $resource['public_id']);
+        }, $responseImageFiles->getArrayCopy()['resources']);
+
+        $videoFiles = array_map(function (array $resource) {
+            return $this->normalizeResponse($resource, $resource['public_id']);
+        }, $responseVideoFiles->getArrayCopy()['resources']);
 
         $folders = array_map(function (array $resource) {
+            $path = $this->ensurePrefixedFolderIsRemoved($resource['path']);
+
             return [
                 'type' => 'dir',
-                'path' => $resource['path'],
+                'path' => $path,
                 'name' => $resource['name'],
             ];
         }, $responseDirectories->getArrayCopy()['folders']);
 
-        return [...$files, ...$folders];
+        return [
+            ...$rawFiles,
+            ...$imageFiles,
+            ...$videoFiles,
+            ...$folders,
+        ];
     }
 
     /**
@@ -468,6 +500,19 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         return $path;
     }
 
+    protected function ensurePrefixedFolderIsRemoved(string $path): string
+    {
+        if (config('flysystem-cloudinary.folder')) {
+            $prefix = config('flysystem-cloudinary.folder') . '/';
+
+            return Str::of($path)
+                ->after($prefix)
+                ->__toString();
+        }
+
+        return $path;
+    }
+
     /**
      * Normalize the object result array.
      *
@@ -480,6 +525,8 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         string $path,
         $body = null,
     ): array {
+        $path = $this->ensurePrefixedFolderIsRemoved($path);
+
         return [
             'contents' => $body,
             'etag' => Arr::get($response, 'etag'),

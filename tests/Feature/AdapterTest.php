@@ -207,7 +207,7 @@ class AdapterTest extends TestCase
     public function it_can_delete_a_directory()
     {
         $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
-            $mock->shouldReceive('adminApi->assets')->once()->andReturn(new ApiResponse([
+            $mock->shouldReceive('adminApi->assets')->times(3)->andReturn(new ApiResponse([
                 'resources' => [],
             ], []));
             $mock->shouldReceive('adminApi->subFolders')->once()->andReturn(new ApiResponse([
@@ -220,7 +220,7 @@ class AdapterTest extends TestCase
         $bool = $adapter->deleteDir('::path::');
 
         $this->assertTrue($bool);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 3);
+        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 5);
     }
 
     /** @test */
@@ -294,7 +294,7 @@ class AdapterTest extends TestCase
     public function it_can_list_directory_contents()
     {
         $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
-            $mock->shouldReceive('adminApi->assets')->once()->andReturn(new ApiResponse([
+            $mock->shouldReceive('adminApi->assets')->times(3)->andReturn(new ApiResponse([
                 'resources' => [],
             ], []));
 
@@ -307,7 +307,7 @@ class AdapterTest extends TestCase
         $files = $adapter->listContents('::path::');
 
         $this->assertSame([], $files);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 2);
+        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 4);
     }
 
     /** @test */
