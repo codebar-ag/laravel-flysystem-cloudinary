@@ -170,20 +170,51 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
+        return $this->destroy($path);
+    }
+
+    protected function destroy(string $path): bool
+    {
+        $options = [
+            'invalidate' => true,
+        ];
+
+        $options['resource_type'] = 'image';
         $response = $this
             ->cloudinary
             ->uploadApi()
-            ->destroy($path);
+            ->destroy($path, $options);
+        event(new FlysystemCloudinaryResponseLog($response));
+
+        if ($response->getArrayCopy()['result'] === 'ok') {
+            return true;
+        }
+
+        $options['resource_type'] = 'raw';
+        $response = $this
+            ->cloudinary
+            ->uploadApi()
+            ->destroy($path, $options);
 
         event(new FlysystemCloudinaryResponseLog($response));
 
-        ['result' => $result] = $response->getArrayCopy();
-
-        if ($result === 'not found') {
-            return false;
+        if ($response->getArrayCopy()['result'] === 'ok') {
+            return true;
         }
 
-        return true;
+        $options['resource_type'] = 'video';
+        $response = $this
+            ->cloudinary
+            ->uploadApi()
+            ->destroy($path, $options);
+
+        event(new FlysystemCloudinaryResponseLog($response));
+
+        if ($response->getArrayCopy()['result'] === 'ok') {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -196,7 +227,9 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         $files = $this->listContents($dirname);
 
         foreach ($files as ['path' => $path]) {
-            $this->delete($path);
+            $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
+            $this->destroy($path);
         }
 
         try {

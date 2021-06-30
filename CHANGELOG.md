@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-cloudinary` will be documented in this file.
 
+## Unreleased
+
+- 🐛 Bug Fix: Delete file works with all resource types.
+
 ## 1.0.2 - 2021-06-24
 
 - 🐛 Bug Fix: Folder prefix working correct now
