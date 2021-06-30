@@ -2,7 +2,7 @@
 
 All notable changes to `laravel-cloudinary` will be documented in this file.
 
-## Unreleased
+## 1.0.3 - 2021-06-30
 
 - 🐛 Bug Fix: Delete file works with all resource types.
 
