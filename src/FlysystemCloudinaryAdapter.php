@@ -81,6 +81,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
         $options = [
             'type' => 'upload',
             'public_id' => $path,
+            'invalidate' => true,
             'use_filename' => true,
             'resource_type' => 'auto',
             'unique_filename' => false,
