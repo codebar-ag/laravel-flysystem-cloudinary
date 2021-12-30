@@ -20,11 +20,16 @@
             "name": "Sebastian Fix",
             "email": "sebastian.fix@codebar.ch",
             "role": "Developer"
+        },
+        {
+            "name": "Mohamad Hesari",
+            "email": "mdhesari99@gmail.com",
+            "role": "Developer"
         }
     ],
     "require": {
         "php": "^8.0",
-        "friendsofphp/php-cs-fixer": "3.0.0",
+        "friendsofphp/php-cs-fixer": "3.*",
         "guzzlehttp/guzzle": "^7.0.1",
         "illuminate/contracts": "^8.0",
         "spatie/laravel-package-tools": "^1.4.3",
