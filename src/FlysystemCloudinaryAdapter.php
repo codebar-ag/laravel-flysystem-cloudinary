@@ -24,14 +24,13 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
 
     public function __construct(
         public Cloudinary $cloudinary,
-    )
-    {
+    ) {
     }
 
     /**
      * @inheritDoc
      */
-    public function write($path, $contents, Config $config): array|false
+    public function write($path, $contents, Config $config): array | false
     {
         return $this->upload($path, $contents);
     }
@@ -39,7 +38,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function writeStream($path, $resource, Config $config): array|false
+    public function writeStream($path, $resource, Config $config): array | false
     {
         return $this->upload($path, $resource);
     }
@@ -47,7 +46,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function update($path, $contents, Config $config): array|false
+    public function update($path, $contents, Config $config): array | false
     {
         return $this->upload($path, $contents);
     }
@@ -55,7 +54,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function updateStream($path, $resource, Config $config): array|false
+    public function updateStream($path, $resource, Config $config): array | false
     {
         return $this->upload($path, $resource);
     }
@@ -67,7 +66,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      *
      * @param string|resource $body
      */
-    protected function upload(string $path, $body): array|false
+    protected function upload(string $path, $body): array | false
     {
         if (is_string($body)) {
             $tempFile = tmpfile();
@@ -217,7 +216,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function createDir($dirname, Config $config): array|false
+    public function createDir($dirname, Config $config): array | false
     {
         $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
 
@@ -243,7 +242,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#explicit_method
      */
-    public function has($path): array|bool|null
+    public function has($path): array | bool | null
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -259,7 +258,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function read($path): array|false
+    public function read($path): array | false
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -275,7 +274,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function readStream($path): array|false
+    public function readStream($path): array | false
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -307,7 +306,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#explicit_method
      */
-    protected function readObject(string $path): array|bool
+    protected function readObject(string $path): array | bool
     {
         try {
             $response = $this->explicit($path);
@@ -404,7 +403,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function getMetadata($path): array|false
+    public function getMetadata($path): array | false
     {
         $meta = $this->readObject($path);
 
@@ -418,7 +417,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function getSize($path): array|false
+    public function getSize($path): array | false
     {
         return $this->getMetadata($path);
     }
@@ -426,7 +425,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function getMimetype($path): array|false
+    public function getMimetype($path): array | false
     {
         return $this->getMetadata($path);
     }
@@ -434,12 +433,12 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     /**
      * @inheritDoc
      */
-    public function getTimestamp($path): array|false
+    public function getTimestamp($path): array | false
     {
         return $this->getMetadata($path);
     }
 
-    public function getUrl(string $path): string|false
+    public function getUrl(string $path): string | false
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -542,11 +541,10 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      * @param string|resource|null $body
      */
     protected function normalizeResponse(
-        ApiResponse|array $response,
+        ApiResponse | array $response,
         string $path,
         $body = null,
-    ): array
-    {
+    ): array {
         $path = $this->ensurePrefixedFolderIsRemoved($path);
 
         return [
