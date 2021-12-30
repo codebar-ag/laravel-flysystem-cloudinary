@@ -1,5 +1,5 @@
 {
-    "name": "codebar-ag/laravel-flysystem-cloudinary",
+    "name": "mdhesari/laravel-flysystem-cloudinary",
     "description": "Cloudinary Flysystem v1 integration with Laravel",
     "keywords": [
         "laravel",
