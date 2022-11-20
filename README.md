@@ -93,12 +93,12 @@ To customize the name of the stored file, you may use the `storeAs` methods
 of the `Image` field:
 
 ```php
-use Illuminate\Http\Request;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Image;
 
 Image::make('Image')
     ->disk('cloudinary')
-    ->storeAs(function (Request $request) {
+    ->storeAs(function (NovaRequest $request) {
         return sha1($request->image->getClientOriginalName());
     }),
 ```

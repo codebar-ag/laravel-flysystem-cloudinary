@@ -11,24 +11,21 @@ use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use League\Flysystem\Adapter\AbstractAdapter;
-use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Util;
 
-class FlysystemCloudinaryAdapter extends AbstractAdapter
+class FlysystemCloudinaryAdapter implements FilesystemAdapter
 {
-    use NotSupportingVisibilityTrait;
-
     public function __construct(
         public Cloudinary $cloudinary,
     ) {
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function write($path, $contents, Config $config): array | false
     {
@@ -36,7 +33,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function writeStream($path, $resource, Config $config): array | false
     {
@@ -44,7 +41,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function update($path, $contents, Config $config): array | false
     {
@@ -52,7 +49,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function updateStream($path, $resource, Config $config): array | false
     {
@@ -64,7 +61,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#upload_method
      *
-     * @param  string|resource  $body
+     * @param string|resource $body
      */
     protected function upload(string $path, $body): array | false
     {
@@ -110,7 +107,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#rename_method
      */
@@ -139,7 +136,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function copy($path, $newpath): bool
     {
@@ -163,7 +160,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#destroy_method
      */
@@ -219,7 +216,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function deleteDir($dirname): bool
     {
@@ -248,7 +245,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function createDir($dirname, Config $config): array | false
     {
@@ -272,7 +269,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#explicit_method
      */
@@ -290,7 +287,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function read($path): array | false
     {
@@ -306,7 +303,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function readStream($path): array | false
     {
@@ -360,7 +357,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function listContents($directory = '', $recursive = false): array
     {
@@ -435,7 +432,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getMetadata($path): array | false
     {
@@ -449,7 +446,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getSize($path): array | false
     {
@@ -457,7 +454,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getMimetype($path): array | false
     {
@@ -465,7 +462,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getTimestamp($path): array | false
     {
@@ -557,7 +554,7 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
     protected function ensurePrefixedFolderIsRemoved(string $path): string
     {
         if (config('flysystem-cloudinary.folder')) {
-            $prefix = config('flysystem-cloudinary.folder').'/';
+            $prefix = config('flysystem-cloudinary.folder') . '/';
 
             return Str::of($path)
                 ->after($prefix)
@@ -572,12 +569,12 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
      *
      * https://flysystem.thephpleague.com/v1/docs/architecture/
      *
-     * @param  string|resource|null  $body
+     * @param string|resource|null $body
      */
     protected function normalizeResponse(
         ApiResponse | array $response,
         string $path,
-        $body = null,
+                            $body = null,
     ): array {
         $path = $this->ensurePrefixedFolderIsRemoved($path);
 
@@ -593,5 +590,55 @@ class FlysystemCloudinaryAdapter extends AbstractAdapter
             'versionid' => Arr::get($response, 'version_id'),
             'visibility' => Arr::get($response, 'access_mode') === 'public' ? 'public' : 'private',
         ];
+    }
+
+    public function fileExists(string $path): bool
+    {
+        // TODO: Implement fileExists() method.
+    }
+
+    public function directoryExists(string $path): bool
+    {
+        // TODO: Implement directoryExists() method.
+    }
+
+    public function deleteDirectory(string $path): void
+    {
+        // TODO: Implement deleteDirectory() method.
+    }
+
+    public function createDirectory(string $path, Config $config): void
+    {
+        // TODO: Implement createDirectory() method.
+    }
+
+    public function setVisibility(string $path, string $visibility): void
+    {
+        // TODO: Implement setVisibility() method.
+    }
+
+    public function visibility(string $path): FileAttributes
+    {
+        // TODO: Implement visibility() method.
+    }
+
+    public function mimeType(string $path): FileAttributes
+    {
+        // TODO: Implement mimeType() method.
+    }
+
+    public function lastModified(string $path): FileAttributes
+    {
+        // TODO: Implement lastModified() method.
+    }
+
+    public function fileSize(string $path): FileAttributes
+    {
+        // TODO: Implement fileSize() method.
+    }
+
+    public function move(string $source, string $destination, Config $config): void
+    {
+        // TODO: Implement move() method.
     }
 }
