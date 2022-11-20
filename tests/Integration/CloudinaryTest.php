@@ -5,8 +5,6 @@ namespace CodebarAg\FlysystemCloudinary\Tests\Integration;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
 use CodebarAg\FlysystemCloudinary\Tests\TestCase;
-use Illuminate\Http\Testing\File;
-use League\Flysystem\Config;
 
 /** @group Integration */
 class CloudinaryTest extends TestCase
@@ -28,5 +26,4 @@ class CloudinaryTest extends TestCase
 
         $this->adapter = new FlysystemCloudinaryAdapter($cloudinary);
     }
-
 }

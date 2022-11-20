@@ -2,12 +2,12 @@
 
 namespace CodebarAg\FlysystemCloudinary\Tests\Feature;
 
-use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
-use CodebarAg\FlysystemCloudinary\Tests\TestCase;
-use Illuminate\Support\Facades\Event;
 use Cloudinary\Api\ApiResponse;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
+use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
+use CodebarAg\FlysystemCloudinary\Tests\TestCase;
+use Illuminate\Support\Facades\Event;
 use League\Flysystem\Config;
 use Mockery\MockInterface;
 
@@ -21,7 +21,6 @@ class AdapterTest extends TestCase
 
         Event::fake();
     }
-
 
     /** @test */
     public function it_can_write()
@@ -55,6 +54,4 @@ class AdapterTest extends TestCase
         $this->assertSame('public', $meta['visibility']);
         Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
     }
-
-
 }
