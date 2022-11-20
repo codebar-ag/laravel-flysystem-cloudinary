@@ -14,10 +14,12 @@ additional parameters to your url 😉
 
 ## 🛠 Requirements
 
-- PHP: `^8.0`
-- Laravel: `^8.12`
-- league/flysystem: `^1.1` (default in Laravel 8)
 - Cloudinary Account
+
+| Package 	 | PHP 	  | Laravel 	   | Flysystem 	 |
+|-----------|--------|-------------|-------------|
+| >v2.0 	   | >8.1 	 | > Laravel 9 	 | > 3.0 	     |
+| >v1.0 	   | >8.0 	 | > Laravel 8 	 | > 1.1 	     |
 
 ## ⚙️ Installation
 
