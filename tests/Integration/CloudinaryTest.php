@@ -32,7 +32,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_write()
     {
-        $publicId = 'file-write-' . rand();
+        $publicId = 'file-write-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->write($publicId, $fakeImage, new Config());
@@ -44,7 +44,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_write_stream()
     {
-        $publicId = 'file-write-stream-' . rand();
+        $publicId = 'file-write-stream-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->writeStream($publicId, $fakeImage, new Config());
@@ -56,7 +56,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_update()
     {
-        $publicId = 'file-update-' . rand();
+        $publicId = 'file-update-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->update($publicId, $fakeImage, new Config());
@@ -68,7 +68,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_update_stream()
     {
-        $publicId = 'file-update-stream-' . rand();
+        $publicId = 'file-update-stream-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->updateStream($publicId, $fakeImage, new Config());
@@ -94,8 +94,8 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_rename()
     {
-        $path = 'file-old-path-' . rand();
-        $newPath = 'file-new-path-' . rand();
+        $path = 'file-old-path-'.rand();
+        $newPath = 'file-new-path-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($path, $fakeImage, new Config());
 
@@ -119,8 +119,8 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_does_not_rename_if_new_path_already_exists()
     {
-        $path = 'file-rename-' . rand();
-        $newPath = 'file-already-exists-' . rand();
+        $path = 'file-rename-'.rand();
+        $newPath = 'file-already-exists-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($path, $fakeImage, new Config());
         $this->adapter->write($newPath, $fakeImage, new Config());
@@ -135,8 +135,8 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_copy()
     {
-        $path = 'file-old-copy-' . rand();
-        $newPath = 'file-new-copy-' . rand();
+        $path = 'file-old-copy-'.rand();
+        $newPath = 'file-new-copy-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($path, $fakeImage, new Config());
 
@@ -161,7 +161,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_delete()
     {
-        $publicId = 'file-delete-' . rand();
+        $publicId = 'file-delete-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -183,7 +183,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_delete_a_directory()
     {
-        $publicId = 'delete_dir/file-' . rand();
+        $publicId = 'delete_dir/file-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -195,7 +195,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_create_a_directory()
     {
-        $directory = 'directory-' . rand();
+        $directory = 'directory-'.rand();
 
         $meta = $this->adapter->createDir($directory, new Config());
 
@@ -209,7 +209,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_check_if_file_exists()
     {
-        $publicId = 'file-has-' . rand();
+        $publicId = 'file-has-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -232,7 +232,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_read()
     {
-        $publicId = 'file-read-' . rand();
+        $publicId = 'file-read-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -246,7 +246,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_read_stream()
     {
-        $publicId = 'file-read-stream-' . rand();
+        $publicId = 'file-read-stream-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -288,7 +288,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_does_get_metadata()
     {
-        $publicId = 'file-get-metadata-' . rand();
+        $publicId = 'file-get-metadata-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -311,7 +311,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_does_get_size()
     {
-        $publicId = 'file-get-size-' . rand();
+        $publicId = 'file-get-size-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -334,7 +334,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_does_get_mimetype()
     {
-        $publicId = 'file-get-mimetype-' . rand();
+        $publicId = 'file-get-mimetype-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -357,7 +357,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_does_get_timestamp()
     {
-        $publicId = 'file-get-mimetype-' . rand();
+        $publicId = 'file-get-mimetype-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -394,7 +394,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_does_get_url()
     {
-        $publicId = 'file-get-url-' . rand();
+        $publicId = 'file-get-url-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
