@@ -2,6 +2,22 @@
 
 All notable changes to `laravel-cloudinary` will be documented in this file.
 
+## 2.0.0 - 2022-11-20
+
+laravel-flysystem v3 upgrade:
+
+## 1.1.0 - 2022-03-16
+
+- Laravel 9 Support
+
+## 1.0.4 - 2021-12-30
+
+- Bumped Version "friendsofphp/php-cs-fixer": "3.*",
+
+## 1.0.3 - 2021-06-30
+
+- 🐛 Bug Fix: Delete file works with all resource types.
+
 ## 1.0.3 - 2021-06-30
 
 - 🐛 Bug Fix: Delete file works with all resource types.
