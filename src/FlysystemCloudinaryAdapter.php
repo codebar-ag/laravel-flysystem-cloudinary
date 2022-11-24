@@ -9,13 +9,17 @@ use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Api\Exception\RateLimited;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
+use Exception;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
-use League\Flysystem\Util;
+use League\Flysystem\UnableToCopyFile;
+use League\MimeTypeDetection\FinfoMimeTypeDetector;
+use Throwable;
 
 class FlysystemCloudinaryAdapter implements FilesystemAdapter
 {
@@ -27,17 +31,17 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function write($path, $contents, Config $config): array | false
+    public function write(string $path, string $contents, Config $config): void
     {
-        return $this->upload($path, $contents);
+        $this->upload($path, $contents);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function writeStream($path, $resource, Config $config): array | false
+    public function writeStream(string $path, $resource, Config $config): void
     {
-        return $this->upload($path, $resource);
+        $this->upload($path, $resource);
     }
 
     /**
@@ -138,25 +142,19 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function copy($path, $newpath): bool
+    public function copy(string $path, string $newpath, Config $config): void
     {
-        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
-
-        $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
-
-        $metaRead = $this->readObject($path);
-
-        if ($metaRead === false) {
-            return false;
+        try {
+            $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+    
+            $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
+    
+            $metaRead = $this->readObject($path);
+    
+            $this->upload($newpath, $metaRead['contents']);
+        } catch (Throwable $exception) {
+            throw UnableToCopyFile::fromLocationTo($path, $newpath, $exception);
         }
-
-        $metaUpload = $this->upload($newpath, $metaRead['contents']);
-
-        if ($metaUpload === false) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -164,11 +162,11 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#destroy_method
      */
-    public function delete($path): bool
+    public function delete(string $path): void
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
-        return $this->destroy($path);
+        $this->destroy($path);
     }
 
     protected function destroy(string $path): bool
@@ -289,7 +287,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function read($path): array | false
+    public function read(string $path): string
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -574,14 +572,14 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     protected function normalizeResponse(
         ApiResponse | array $response,
         string $path,
-                            $body = null,
+        $body = null,
     ): array {
         $path = $this->ensurePrefixedFolderIsRemoved($path);
 
         return [
             'contents' => $body,
             'etag' => Arr::get($response, 'etag'),
-            'mimetype' => Util::guessMimeType($path, $body) ?? 'text/plain',
+            'mimetype' => (new FinfoMimeTypeDetector())->detectMimeTypeFromFile($path) ?? 'text/plain',
             'path' => $path,
             'size' => Arr::get($response, 'bytes'),
             'timestamp' => strtotime(Arr::get($response, 'created_at')),
@@ -594,7 +592,12 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     public function fileExists(string $path): bool
     {
-        // TODO: Implement fileExists() method.
+        try {
+            $this->cloudinary->adminApi()->asset($path);
+        } catch (Exception $e) {
+            return false;
+        }
+        return true;
     }
 
     public function directoryExists(string $path): bool
