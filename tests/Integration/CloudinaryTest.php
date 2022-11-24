@@ -35,9 +35,9 @@ class CloudinaryTest extends TestCase
         $publicId = 'file-write-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
-        $meta = $this->adapter->write($publicId, $fakeImage, new Config());
+        $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $this->assertUploadResponse($meta, $publicId);
+        $this->assertUploadResponse($this->adapter->meta, $publicId);
         $this->adapter->delete($publicId); // cleanup
     }
 
@@ -47,9 +47,9 @@ class CloudinaryTest extends TestCase
         $publicId = 'file-write-stream-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
-        $meta = $this->adapter->writeStream($publicId, $fakeImage, new Config());
+        $this->adapter->writeStream($publicId, $fakeImage, new Config());
 
-        $this->assertUploadResponse($meta, $publicId);
+        $this->assertUploadResponse($this->adapter->meta, $publicId);
         $this->adapter->delete($publicId); // cleanup
     }
 
@@ -153,9 +153,9 @@ class CloudinaryTest extends TestCase
         $path = 'file-does-not-exist';
         $newPath = 'file-copied';
 
-        $bool = $this->adapter->copy($path, $newPath, new Config());
+        $this->adapter->copy($path, $newPath, new Config());
 
-        $this->assertFalse($bool);
+        $this->assertFalse($this->adapter->copied);
     }
 
     /** @test */
@@ -252,9 +252,9 @@ class CloudinaryTest extends TestCase
     {
         $publicId = 'file-does-not-exist';
 
-        $bool = $this->adapter->read($publicId);
+        $response = $this->adapter->read($publicId);
 
-        $this->assertFalse($bool);
+        $this->assertEmpty($response);
     }
 
     /** @test */

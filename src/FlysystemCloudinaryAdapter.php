@@ -33,7 +33,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function write(string $path, string $contents, Config $config): void
     {
-        $this->upload($path, $contents);
+        $this->meta = $this->upload($path, $contents);
     }
 
     /**
@@ -41,7 +41,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function writeStream(string $path, $resource, Config $config): void
     {
-        $this->upload($path, $resource);
+        $this->meta = $this->upload($path, $resource);
     }
 
     /**
@@ -144,17 +144,25 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function copy(string $path, string $newpath, Config $config): void
     {
-        try {
-            $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
-    
-            $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
-    
-            $metaRead = $this->readObject($path);
-    
-            $this->upload($newpath, $metaRead['contents']);
-        } catch (Throwable $exception) {
-            throw UnableToCopyFile::fromLocationTo($path, $newpath, $exception);
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
+        $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
+
+        $metaRead = $this->readObject($path);
+
+        if ($metaRead === false) {
+            $this->copied = false;
+            return;
         }
+
+        $metaUpload = $this->upload($newpath, $metaRead['contents']);
+
+        if ($metaUpload === false) {
+            $this->copied = false;
+            return;
+        }
+
+        $this->copied = true;
     }
 
     /**
@@ -166,7 +174,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
-        $this->destroy($path);
+        $this->deleted = $this->destroy($path);
     }
 
     protected function destroy(string $path): bool
@@ -292,10 +300,6 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $meta = $this->readObject($path);
-
-        if ($meta === false) {
-            return false;
-        }
 
         return $meta;
     }
@@ -579,7 +583,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         return [
             'contents' => $body,
             'etag' => Arr::get($response, 'etag'),
-            'mimetype' => (new FinfoMimeTypeDetector())->detectMimeTypeFromFile($path) ?? 'text/plain',
+            'mimetype' => (new FinfoMimeTypeDetector())->detectMimeTypeFromPath($path) ?? 'text/plain',
             'path' => $path,
             'size' => Arr::get($response, 'bytes'),
             'timestamp' => strtotime(Arr::get($response, 'created_at')),
