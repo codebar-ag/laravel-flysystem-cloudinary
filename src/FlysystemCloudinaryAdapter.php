@@ -17,9 +17,7 @@ use Illuminate\Support\Str;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
-use League\Flysystem\UnableToCopyFile;
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
-use Throwable;
 
 class FlysystemCloudinaryAdapter implements FilesystemAdapter
 {
@@ -583,7 +581,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         return [
             'contents' => $body,
             'etag' => Arr::get($response, 'etag'),
-            'mimetype' => (new FinfoMimeTypeDetector())->detectMimeTypeFromPath($path) ?? 'text/plain',
+            'mimetype' => (new FinfoMimeTypeDetector())->detectMimeType($path, $body) ?? 'text/plain',
             'path' => $path,
             'size' => Arr::get($response, 'bytes'),
             'timestamp' => strtotime(Arr::get($response, 'created_at')),
