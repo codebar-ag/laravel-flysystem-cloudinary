@@ -35,9 +35,9 @@ class CloudinaryTest extends TestCase
         $publicId = 'file-write-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
-        $meta = $this->adapter->write($publicId, $fakeImage, new Config());
+        $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $this->assertUploadResponse($meta, $publicId);
+        $this->assertUploadResponse($this->adapter->meta, $publicId);
         $this->adapter->delete($publicId); // cleanup
     }
 
@@ -47,9 +47,9 @@ class CloudinaryTest extends TestCase
         $publicId = 'file-write-stream-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
-        $meta = $this->adapter->writeStream($publicId, $fakeImage, new Config());
+        $this->adapter->writeStream($publicId, $fakeImage, new Config());
 
-        $this->assertUploadResponse($meta, $publicId);
+        $this->assertUploadResponse($this->adapter->meta, $publicId);
         $this->adapter->delete($publicId); // cleanup
     }
 
@@ -140,9 +140,9 @@ class CloudinaryTest extends TestCase
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($path, $fakeImage, new Config());
 
-        $bool = $this->adapter->copy($path, $newPath);
+        $this->adapter->copy($path, $newPath, new Config());
 
-        $this->assertTrue($bool);
+        $this->assertTrue($this->adapter->fileExists($newPath));
         $this->adapter->delete($path); // cleanup
         $this->adapter->delete($newPath); // cleanup
     }
@@ -153,9 +153,9 @@ class CloudinaryTest extends TestCase
         $path = 'file-does-not-exist';
         $newPath = 'file-copied';
 
-        $bool = $this->adapter->copy($path, $newPath);
+        $this->adapter->copy($path, $newPath, new Config());
 
-        $this->assertFalse($bool);
+        $this->assertFalse($this->adapter->copied);
     }
 
     /** @test */
@@ -165,19 +165,9 @@ class CloudinaryTest extends TestCase
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $bool = $this->adapter->delete($publicId);
+        $this->adapter->delete($publicId);
 
-        $this->assertTrue($bool);
-    }
-
-    /** @test */
-    public function it_does_not_delete_if_file_is_not_found()
-    {
-        $publicId = 'file-does-not-exist';
-
-        $bool = $this->adapter->delete($publicId);
-
-        $this->assertFalse($bool);
+        $this->assertFalse($this->adapter->fileExists($publicId));
     }
 
     /** @test */
@@ -262,9 +252,9 @@ class CloudinaryTest extends TestCase
     {
         $publicId = 'file-does-not-exist';
 
-        $bool = $this->adapter->read($publicId);
+        $response = $this->adapter->read($publicId);
 
-        $this->assertFalse($bool);
+        $this->assertEmpty($response);
     }
 
     /** @test */
