@@ -45,7 +45,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function update($path, $contents, Config $config): array | false
+    public function update($path, $contents, Config $config): array|false
     {
         return $this->upload($path, $contents);
     }
@@ -53,7 +53,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function updateStream($path, $resource, Config $config): array | false
+    public function updateStream($path, $resource, Config $config): array|false
     {
         return $this->upload($path, $resource);
     }
@@ -65,7 +65,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      *
      * @param  string|resource  $body
      */
-    protected function upload(string $path, $body): array | false
+    protected function upload(string $path, $body): array|false
     {
         if (is_string($body)) {
             $tempFile = tmpfile();
@@ -128,7 +128,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
                 ->cloudinary
                 ->uploadApi()
                 ->rename($path, $newpath, $options);
-        } catch (NotFound | BadRequest) {
+        } catch (NotFound|BadRequest) {
             return false;
         }
 
@@ -150,6 +150,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
         if ($metaRead === false) {
             $this->copied = false;
+
             return;
         }
 
@@ -157,6 +158,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
         if ($metaUpload === false) {
             $this->copied = false;
+
             return;
         }
 
@@ -239,7 +241,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
                 ->cloudinary
                 ->adminApi()
                 ->deleteFolder($dirname);
-        } catch (ApiError | RateLimited) {
+        } catch (ApiError|RateLimited) {
             return false;
         }
 
@@ -251,7 +253,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function createDir($dirname, Config $config): array | false
+    public function createDir($dirname, Config $config): array|false
     {
         $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
 
@@ -277,7 +279,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#explicit_method
      */
-    public function has($path): array | bool | null
+    public function has($path): array|bool|null
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -305,7 +307,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function readStream($path): array | false
+    public function readStream($path): array|false
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -337,7 +339,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      *
      * https://cloudinary.com/documentation/image_upload_api_reference#explicit_method
      */
-    protected function readObject(string $path): array | bool
+    protected function readObject(string $path): array|bool
     {
         try {
             $response = $this->explicit($path);
@@ -392,7 +394,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
                 ->cloudinary
                 ->adminApi()
                 ->subFolders($directory);
-        } catch (RateLimited | ApiError) {
+        } catch (RateLimited|ApiError) {
             return [];
         }
 
@@ -434,7 +436,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function getMetadata($path): array | false
+    public function getMetadata($path): array|false
     {
         $meta = $this->readObject($path);
 
@@ -448,7 +450,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function getSize($path): array | false
+    public function getSize($path): array|false
     {
         return $this->getMetadata($path);
     }
@@ -456,7 +458,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function getMimetype($path): array | false
+    public function getMimetype($path): array|false
     {
         return $this->getMetadata($path);
     }
@@ -464,12 +466,12 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function getTimestamp($path): array | false
+    public function getTimestamp($path): array|false
     {
         return $this->getMetadata($path);
     }
 
-    public function getUrl(string $path): string | false
+    public function getUrl(string $path): string|false
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -572,7 +574,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      * @param  string|resource|null  $body
      */
     protected function normalizeResponse(
-        ApiResponse | array $response,
+        ApiResponse|array $response,
         string $path,
         $body = null,
     ): array {
@@ -599,6 +601,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         } catch (Exception $e) {
             return false;
         }
+
         return true;
     }
 
