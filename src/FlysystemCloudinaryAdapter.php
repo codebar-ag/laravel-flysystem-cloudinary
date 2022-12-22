@@ -20,10 +20,22 @@ use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\UnableToMoveFile;
+use League\Flysystem\UnableToRetrieveMetadata;
+use League\Flysystem\UnableToSetVisibility;
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
+use Throwable;
 
 class FlysystemCloudinaryAdapter implements FilesystemAdapter
 {
+    private const EXTRA_METADATA_FIELDS = [
+        'version',
+        'width',
+        'height',
+        'url',
+        'secure_url',
+        'next_cursor',
+    ];
+
     public function __construct(
         public Cloudinary $cloudinary,
     ) {
@@ -452,42 +464,45 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getMetadata($path): array|false
+    private function getMetadata(string $path, string $type): FileAttributes
     {
-        $meta = $this->readObject($path);
-
-        if ($meta === false) {
-            return false;
+        try {
+            $result = (array) $this->cloudinary->adminApi()->asset($path);
+        } catch (Throwable $exception) {
+            throw UnableToRetrieveMetadata::create($path, $type, '', $exception);
         }
 
-        return $meta;
+        $attributes = $this->mapToFileAttributes($result, $path);
+
+        if (!$attributes instanceof FileAttributes) {
+            throw UnableToRetrieveMetadata::create($path, $type);
+        }
+
+        return $attributes;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getSize($path): array|false
+    private function mapToFileAttributes($resource): FileAttributes
     {
-        return $this->getMetadata($path);
+        return new FileAttributes(
+            $resource['public_id'],
+            (int) $resource['bytes'],
+            'public',
+            (int) strtotime($resource['created_at']),
+            (string) sprintf('%s/%s', $resource['resource_type'] , $resource['format']),
+            $this->extractExtraMetadata((array) $resource)
+        );
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getMimetype($path): array|false
+    private function extractExtraMetadata(array $metadata): array
     {
-        return $this->getMetadata($path);
-    }
+        $extracted = [];
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getTimestamp($path): array|false
-    {
-        return $this->getMetadata($path);
+        foreach (static::EXTRA_METADATA_FIELDS as $field) {
+            if (isset($metadata[$field]) && $metadata[$field] !== '') {
+                $extracted[$field] = $metadata[$field];
+            }
+        }
+
+        return $extracted;
     }
 
     public function getUrl(string $path): string|false
@@ -661,26 +676,46 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     public function setVisibility(string $path, string $visibility): void
     {
-        // TODO: Implement setVisibility() method.
+        throw UnableToSetVisibility::atLocation($path, 'Adapter does not support visibility controls.');
+    }
+
+    public function getMimetype($path): string
+    {
+        return $this->mimeType($path)->mimeType();
+    }
+
+    public function getVisibility($path): string
+    {
+        return $this->visibility($path)->visibility();
+    }
+
+    public function getTimestamp($path): string
+    {
+        return $this->lastModified($path)->lastModified();
+    }
+
+    public function getSize($path): string
+    {
+        return $this->fileSize($path)->fileSize();
     }
 
     public function visibility(string $path): FileAttributes
     {
-        // TODO: Implement visibility() method.
+        return $this->getMetadata($path, FileAttributes::ATTRIBUTE_VISIBILITY);
     }
 
     public function mimeType(string $path): FileAttributes
     {
-        // TODO: Implement mimeType() method.
+        return $this->getMetadata($path, FileAttributes::ATTRIBUTE_MIME_TYPE);
     }
 
     public function lastModified(string $path): FileAttributes
     {
-        // TODO: Implement lastModified() method.
+        return $this->getMetadata($path, FileAttributes::ATTRIBUTE_LAST_MODIFIED);
     }
 
     public function fileSize(string $path): FileAttributes
     {
-        // TODO: Implement fileSize() method.
+        return $this->getMetadata($path, FileAttributes::ATTRIBUTE_FILE_SIZE);
     }
 }
