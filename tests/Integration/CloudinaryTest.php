@@ -421,4 +421,16 @@ class CloudinaryTest extends TestCase
         $this->expectException(UnableToMoveFile::class);
         $this->adapter->move($sourceId, $movedToId, new Config());
     }
+
+    /** @test */
+    public function it_can_create_and_delete_directory()
+    {
+        $directory = 'directory_to_create';
+        $this->adapter->createDirectory($directory, new Config());
+        
+        $this->assertTrue($this->adapter->directoryExists($directory));
+
+        $this->adapter->deleteDirectory($directory);
+        $this->assertFalse($this->adapter->directoryExists($directory));
+    }
 }

@@ -626,17 +626,37 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     public function directoryExists(string $path): bool
     {
-        // TODO: Implement directoryExists() method.
+        $folders = [];
+        $needle = substr($path, 0, strripos($path, '/'));
+
+        $response = null;
+        do {
+            $response = (array) $this->cloudinary->adminApi()->subFolders($needle, [
+                'max_results' => 4,
+                'next_cursor' => isset($response['next_cursor']) ? $response['next_cursor'] : null,
+            ]);
+
+            $folders = array_merge($folders, $response['folders']);
+        } while (array_key_exists('next_cursor', $response) && !is_null($response['next_cursor']));
+
+        $folders_found = array_filter(
+            $folders,
+            function ($e) use ($path) {
+                return $e['path'] == $path;
+            }
+        );
+
+        return count($folders_found);
     }
 
     public function deleteDirectory(string $path): void
     {
-        // TODO: Implement deleteDirectory() method.
+        $this->cloudinary->adminApi()->deleteFolder($path);
     }
 
     public function createDirectory(string $path, Config $config): void
     {
-        // TODO: Implement createDirectory() method.
+        $this->cloudinary->adminApi()->createFolder($path);
     }
 
     public function setVisibility(string $path, string $visibility): void
