@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\UnableToMoveFile;
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
 
 class FlysystemCloudinaryAdapter implements FilesystemAdapter
@@ -275,6 +276,17 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             'path' => $dirname,
             'type' => 'dir',
         ];
+    }
+
+    public function move(string $source, string $destination, Config $config): void
+    {
+        try {
+            $this->cloudinary
+                ->uploadApi()
+                ->rename($source, $destination);
+        } catch (NotFound $exception) {
+            throw UnableToMoveFile::fromLocationTo($source, $destination, $exception);
+        }
     }
 
     /**
@@ -650,10 +662,5 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     public function fileSize(string $path): FileAttributes
     {
         // TODO: Implement fileSize() method.
-    }
-
-    public function move(string $source, string $destination, Config $config): void
-    {
-        // TODO: Implement move() method.
     }
 }

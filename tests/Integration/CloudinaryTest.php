@@ -7,6 +7,7 @@ use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
 use CodebarAg\FlysystemCloudinary\Tests\TestCase;
 use Illuminate\Http\Testing\File;
 use League\Flysystem\Config;
+use League\Flysystem\UnableToMoveFile;
 
 /** @group Integration */
 class CloudinaryTest extends TestCase
@@ -392,5 +393,32 @@ class CloudinaryTest extends TestCase
         $this->assertStringStartsWith('https://', $url);
         $this->assertStringContainsString($publicId, $url);
         $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_can_move_file()
+    {
+        $sourceId = 'source-file-'.rand();
+        $source = File::image('black.jpg')->getContent();
+        $movedToId = 'moved-file-'.rand();
+
+        $this->assertFalse($this->adapter->fileExists($movedToId));
+
+        $this->adapter->write($sourceId, $source, new Config());
+        $this->adapter->move($sourceId, $movedToId, new Config());
+
+        $this->assertFalse($this->adapter->fileExists($sourceId));
+        $this->assertTrue($this->adapter->fileExists($movedToId));
+    }
+
+    /** @test */
+    public function it_cant_move_unexisted_file()
+    {
+        $sourceId = 'source-file-'.rand();
+        $movedToId = 'moved-file-'.rand();
+
+        $this->assertFalse($this->adapter->fileExists($sourceId));
+        $this->expectException(UnableToMoveFile::class);
+        $this->adapter->move($sourceId, $movedToId, new Config());
     }
 }
