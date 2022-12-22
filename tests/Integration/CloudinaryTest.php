@@ -226,10 +226,9 @@ class CloudinaryTest extends TestCase
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $meta = $this->adapter->read($publicId);
+        $content = $this->adapter->read($publicId);
 
-        $this->assertIsString($meta['contents']);
-        $this->assertArrayNotHasKey('stream', $meta);
+        $this->assertSame($content, $fakeImage);
         $this->adapter->delete($publicId); // cleanup
     }
 

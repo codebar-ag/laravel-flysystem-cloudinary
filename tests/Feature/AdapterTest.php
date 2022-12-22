@@ -255,24 +255,6 @@ class AdapterTest extends TestCase
     }
 
     /** @test */
-    public function it_can_read()
-    {
-        Http::fake(['*' => Http::response('::content::')]);
-        $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
-            $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
-                'secure_url' => '::url::',
-            ], []));
-        });
-        $adapter = new FlysystemCloudinaryAdapter($mock);
-
-        $meta = $adapter->read('::path::');
-
-        $this->assertSame('::content::', $meta['contents']);
-        $this->assertArrayNotHasKey('stream', $meta);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
-    }
-
-    /** @test */
     public function it_can_read_stream()
     {
         Http::fake();

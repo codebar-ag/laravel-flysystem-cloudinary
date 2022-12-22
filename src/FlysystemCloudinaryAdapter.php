@@ -7,7 +7,9 @@ use Cloudinary\Api\Exception\ApiError;
 use Cloudinary\Api\Exception\BadRequest;
 use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Api\Exception\RateLimited;
+use Cloudinary\Asset\Media;
 use Cloudinary\Cloudinary;
+use Cloudinary\Configuration\Configuration;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use Exception;
 use Illuminate\Http\Client\RequestException;
@@ -24,6 +26,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     public function __construct(
         public Cloudinary $cloudinary,
     ) {
+        Configuration::instance($cloudinary->configuration);
     }
 
     /**
@@ -299,9 +302,13 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
-        $meta = $this->readObject($path);
+        try {
+            $contents = file_get_contents(Media::fromParams($path));
+        } catch (Exception) {
+            $contents = '';
+        }
 
-        return $meta;
+        return (string) $contents;
     }
 
     /**
