@@ -45,3 +45,8 @@ jobs:
 
       - name: Execute tests
         run: vendor/bin/pest
+        env:
+          FILESYSTEM_DRIVER: ${{ secrets.FILESYSTEM_DRIVER }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_SECRET }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
