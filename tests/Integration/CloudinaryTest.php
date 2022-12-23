@@ -7,6 +7,8 @@ use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
 use CodebarAg\FlysystemCloudinary\Tests\TestCase;
 use Illuminate\Http\Testing\File;
 use League\Flysystem\Config;
+use League\Flysystem\UnableToMoveFile;
+use League\Flysystem\UnableToRetrieveMetadata;
 
 /** @group Integration */
 class CloudinaryTest extends TestCase
@@ -32,31 +34,31 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_write()
     {
-        $publicId = 'file-write-' . rand();
+        $publicId = 'file-write-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
-        $meta = $this->adapter->write($publicId, $fakeImage, new Config());
+        $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $this->assertUploadResponse($meta, $publicId);
+        $this->assertUploadResponse($this->adapter->meta, $publicId);
         $this->adapter->delete($publicId); // cleanup
     }
 
     /** @test */
     public function it_can_write_stream()
     {
-        $publicId = 'file-write-stream-' . rand();
+        $publicId = 'file-write-stream-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
-        $meta = $this->adapter->writeStream($publicId, $fakeImage, new Config());
+        $this->adapter->writeStream($publicId, $fakeImage, new Config());
 
-        $this->assertUploadResponse($meta, $publicId);
+        $this->assertUploadResponse($this->adapter->meta, $publicId);
         $this->adapter->delete($publicId); // cleanup
     }
 
     /** @test */
     public function it_can_update()
     {
-        $publicId = 'file-update-' . rand();
+        $publicId = 'file-update-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->update($publicId, $fakeImage, new Config());
@@ -68,7 +70,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_update_stream()
     {
-        $publicId = 'file-update-stream-' . rand();
+        $publicId = 'file-update-stream-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
 
         $meta = $this->adapter->updateStream($publicId, $fakeImage, new Config());
@@ -94,8 +96,8 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_rename()
     {
-        $path = 'file-old-path-' . rand();
-        $newPath = 'file-new-path-' . rand();
+        $path = 'file-old-path-'.rand();
+        $newPath = 'file-new-path-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($path, $fakeImage, new Config());
 
@@ -119,8 +121,8 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_does_not_rename_if_new_path_already_exists()
     {
-        $path = 'file-rename-' . rand();
-        $newPath = 'file-already-exists-' . rand();
+        $path = 'file-rename-'.rand();
+        $newPath = 'file-already-exists-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($path, $fakeImage, new Config());
         $this->adapter->write($newPath, $fakeImage, new Config());
@@ -135,14 +137,14 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_copy()
     {
-        $path = 'file-old-copy-' . rand();
-        $newPath = 'file-new-copy-' . rand();
+        $path = 'file-old-copy-'.rand();
+        $newPath = 'file-new-copy-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($path, $fakeImage, new Config());
 
-        $bool = $this->adapter->copy($path, $newPath);
+        $this->adapter->copy($path, $newPath, new Config());
 
-        $this->assertTrue($bool);
+        $this->assertTrue($this->adapter->fileExists($newPath));
         $this->adapter->delete($path); // cleanup
         $this->adapter->delete($newPath); // cleanup
     }
@@ -153,37 +155,27 @@ class CloudinaryTest extends TestCase
         $path = 'file-does-not-exist';
         $newPath = 'file-copied';
 
-        $bool = $this->adapter->copy($path, $newPath);
+        $this->adapter->copy($path, $newPath, new Config());
 
-        $this->assertFalse($bool);
+        $this->assertFalse($this->adapter->copied);
     }
 
     /** @test */
     public function it_can_delete()
     {
-        $publicId = 'file-delete-' . rand();
+        $publicId = 'file-delete-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $bool = $this->adapter->delete($publicId);
+        $this->adapter->delete($publicId);
 
-        $this->assertTrue($bool);
-    }
-
-    /** @test */
-    public function it_does_not_delete_if_file_is_not_found()
-    {
-        $publicId = 'file-does-not-exist';
-
-        $bool = $this->adapter->delete($publicId);
-
-        $this->assertFalse($bool);
+        $this->assertFalse($this->adapter->fileExists($publicId));
     }
 
     /** @test */
     public function it_can_delete_a_directory()
     {
-        $publicId = 'delete_dir/file-' . rand();
+        $publicId = 'delete_dir/file-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -195,7 +187,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_create_a_directory()
     {
-        $directory = 'directory-' . rand();
+        $directory = 'directory-'.rand();
 
         $meta = $this->adapter->createDir($directory, new Config());
 
@@ -209,7 +201,7 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_check_if_file_exists()
     {
-        $publicId = 'file-has-' . rand();
+        $publicId = 'file-has-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -232,21 +224,20 @@ class CloudinaryTest extends TestCase
     /** @test */
     public function it_can_read()
     {
-        $publicId = 'file-read-' . rand();
+        $publicId = 'file-read-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $meta = $this->adapter->read($publicId);
+        $content = $this->adapter->read($publicId);
 
-        $this->assertIsString($meta['contents']);
-        $this->assertArrayNotHasKey('stream', $meta);
+        $this->assertSame($content, $fakeImage);
         $this->adapter->delete($publicId); // cleanup
     }
 
     /** @test */
     public function it_can_read_stream()
     {
-        $publicId = 'file-read-stream-' . rand();
+        $publicId = 'file-read-stream-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -262,9 +253,9 @@ class CloudinaryTest extends TestCase
     {
         $publicId = 'file-does-not-exist';
 
-        $bool = $this->adapter->read($publicId);
+        $response = $this->adapter->read($publicId);
 
-        $this->assertFalse($bool);
+        $this->assertEmpty($response);
     }
 
     /** @test */
@@ -286,38 +277,15 @@ class CloudinaryTest extends TestCase
     }
 
     /** @test */
-    public function it_does_get_metadata()
-    {
-        $publicId = 'file-get-metadata-' . rand();
-        $fakeImage = File::image('black.jpg')->getContent();
-        $this->adapter->write($publicId, $fakeImage, new Config());
-
-        $meta = $this->adapter->getMetadata($publicId);
-
-        $this->assertMetadataResponse($meta, $publicId);
-        $this->adapter->delete($publicId); // cleanup
-    }
-
-    /** @test */
-    public function it_does_not_get_metadata_if_file_is_not_found()
-    {
-        $publicId = 'file-does-not-exist';
-
-        $bool = $this->adapter->getMetadata($publicId);
-
-        $this->assertFalse($bool);
-    }
-
-    /** @test */
     public function it_does_get_size()
     {
-        $publicId = 'file-get-size-' . rand();
+        $publicId = 'file-get-size-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $meta = $this->adapter->getSize($publicId);
+        $size = $this->adapter->getSize($publicId);
 
-        $this->assertMetadataResponse($meta, $publicId);
+        $this->assertEquals(695, $size);
         $this->adapter->delete($publicId); // cleanup
     }
 
@@ -326,21 +294,20 @@ class CloudinaryTest extends TestCase
     {
         $publicId = 'file-does-not-exist';
 
-        $bool = $this->adapter->getSize($publicId);
-
-        $this->assertFalse($bool);
+        $this->expectException(UnableToRetrieveMetadata::class);
+        $this->adapter->getSize($publicId);
     }
 
     /** @test */
     public function it_does_get_mimetype()
     {
-        $publicId = 'file-get-mimetype-' . rand();
+        $publicId = 'file-get-mimetype-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $meta = $this->adapter->getMimetype($publicId);
+        $mimeType = $this->adapter->getMimetype($publicId);
 
-        $this->assertMetadataResponse($meta, $publicId);
+        $this->assertEquals('image/jpg', $mimeType);
         $this->adapter->delete($publicId); // cleanup
     }
 
@@ -349,21 +316,20 @@ class CloudinaryTest extends TestCase
     {
         $publicId = 'file-does-not-exist';
 
-        $bool = $this->adapter->getMimetype($publicId);
-
-        $this->assertFalse($bool);
+        $this->expectException(UnableToRetrieveMetadata::class);
+        $this->adapter->getMimetype($publicId);
     }
 
     /** @test */
     public function it_does_get_timestamp()
     {
-        $publicId = 'file-get-mimetype-' . rand();
+        $publicId = 'file-get-mimetype-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
-        $meta = $this->adapter->getTimestamp($publicId);
+        $timeStamp = $this->adapter->getTimestamp($publicId);
 
-        $this->assertMetadataResponse($meta, $publicId);
+        $this->assertTrue((int) $timeStamp > 0);
         $this->adapter->delete($publicId); // cleanup
     }
 
@@ -372,29 +338,36 @@ class CloudinaryTest extends TestCase
     {
         $publicId = 'file-does-not-exist';
 
-        $bool = $this->adapter->getTimestamp($publicId);
-
-        $this->assertFalse($bool);
+        $this->expectException(UnableToRetrieveMetadata::class);
+        $this->adapter->getTimestamp($publicId);
     }
 
-    protected function assertMetadataResponse(array $meta, string $publicId): void
+    /** @test */
+    public function it_does_get_visibility()
     {
-        $this->assertIsString($meta['contents']);
-        $this->assertNull($meta['etag']);
-        $this->assertSame('image/jpeg', $meta['mimetype']);
-        $this->assertSame($publicId, $meta['path']);
-        $this->assertSame(695, $meta['size']);
-        $this->assertIsInt($meta['timestamp']);
-        $this->assertSame('file', $meta['type']);
-        $this->assertIsInt($meta['version']);
-        $this->assertIsString($meta['versionid']);
-        $this->assertSame('public', $meta['visibility']);
+        $publicId = 'file-get-mimetype-'.rand();
+        $fakeImage = File::image('black.jpg')->getContent();
+        $this->adapter->write($publicId, $fakeImage, new Config());
+
+        $visibility = $this->adapter->getVisibility($publicId);
+
+        $this->assertEquals('public', $visibility);
+        $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_does_not_get_visibility_if_file_is_not_found()
+    {
+        $publicId = 'file-does-not-exist';
+
+        $this->expectException(UnableToRetrieveMetadata::class);
+        $this->adapter->getVisibility($publicId);
     }
 
     /** @test */
     public function it_does_get_url()
     {
-        $publicId = 'file-get-url-' . rand();
+        $publicId = 'file-get-url-'.rand();
         $fakeImage = File::image('black.jpg')->getContent();
         $this->adapter->write($publicId, $fakeImage, new Config());
 
@@ -403,5 +376,44 @@ class CloudinaryTest extends TestCase
         $this->assertStringStartsWith('https://', $url);
         $this->assertStringContainsString($publicId, $url);
         $this->adapter->delete($publicId); // cleanup
+    }
+
+    /** @test */
+    public function it_can_move_file()
+    {
+        $sourceId = 'source-file-'.rand();
+        $source = File::image('black.jpg')->getContent();
+        $movedToId = 'moved-file-'.rand();
+
+        $this->assertFalse($this->adapter->fileExists($movedToId));
+
+        $this->adapter->write($sourceId, $source, new Config());
+        $this->adapter->move($sourceId, $movedToId, new Config());
+
+        $this->assertFalse($this->adapter->fileExists($sourceId));
+        $this->assertTrue($this->adapter->fileExists($movedToId));
+    }
+
+    /** @test */
+    public function it_cant_move_unexisted_file()
+    {
+        $sourceId = 'source-file-'.rand();
+        $movedToId = 'moved-file-'.rand();
+
+        $this->assertFalse($this->adapter->fileExists($sourceId));
+        $this->expectException(UnableToMoveFile::class);
+        $this->adapter->move($sourceId, $movedToId, new Config());
+    }
+
+    /** @test */
+    public function it_can_create_and_delete_directory()
+    {
+        $directory = 'directory_to_create';
+        $this->adapter->createDirectory($directory, new Config());
+
+        $this->assertTrue($this->adapter->directoryExists($directory));
+
+        $this->adapter->deleteDirectory($directory);
+        $this->assertFalse($this->adapter->directoryExists($directory));
     }
 }
