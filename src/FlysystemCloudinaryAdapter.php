@@ -475,7 +475,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             throw UnableToRetrieveMetadata::create($path, $type, '', $exception);
         }
 
-        $attributes = $this->mapToFileAttributes($result, $path);
+        $attributes = $this->mapToFileAttributes($result);
 
         if (! $attributes instanceof FileAttributes) {
             throw UnableToRetrieveMetadata::create($path, $type);
@@ -500,7 +500,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     {
         $extracted = [];
 
-        foreach (static::EXTRA_METADATA_FIELDS as $field) {
+        foreach (self::EXTRA_METADATA_FIELDS as $field) {
             if (isset($metadata[$field]) && $metadata[$field] !== '') {
                 $extracted[$field] = $metadata[$field];
             }
@@ -665,7 +665,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             }
         );
 
-        return count($folders_found);
+        return count($folders_found) > 0;
     }
 
     public function deleteDirectory(string $path): void
@@ -693,12 +693,12 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         return $this->visibility($path)->visibility();
     }
 
-    public function getTimestamp($path): string
+    public function getTimestamp($path): int
     {
         return $this->lastModified($path)->lastModified();
     }
 
-    public function getSize($path): string
+    public function getSize($path): int
     {
         return $this->fileSize($path)->fileSize();
     }
