@@ -474,7 +474,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
         $attributes = $this->mapToFileAttributes($result, $path);
 
-        if (!$attributes instanceof FileAttributes) {
+        if (! $attributes instanceof FileAttributes) {
             throw UnableToRetrieveMetadata::create($path, $type);
         }
 
@@ -488,10 +488,11 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             (int) $resource['bytes'],
             'public',
             (int) strtotime($resource['created_at']),
-            (string) sprintf('%s/%s', $resource['resource_type'] , $resource['format']),
+            (string) sprintf('%s/%s', $resource['resource_type'], $resource['format']),
             $this->extractExtraMetadata((array) $resource)
         );
     }
+
     private function extractExtraMetadata(array $metadata): array
     {
         $extracted = [];
@@ -652,7 +653,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             ]);
 
             $folders = array_merge($folders, $response['folders']);
-        } while (array_key_exists('next_cursor', $response) && !is_null($response['next_cursor']));
+        } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor']));
 
         $folders_found = array_filter(
             $folders,

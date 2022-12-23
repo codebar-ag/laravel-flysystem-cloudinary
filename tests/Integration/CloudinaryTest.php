@@ -410,7 +410,7 @@ class CloudinaryTest extends TestCase
     {
         $directory = 'directory_to_create';
         $this->adapter->createDirectory($directory, new Config());
-        
+
         $this->assertTrue($this->adapter->directoryExists($directory));
 
         $this->adapter->deleteDirectory($directory);
