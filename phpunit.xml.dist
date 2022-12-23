@@ -19,7 +19,7 @@
     verbose="true"
 >
     <testsuites>
-        <testsuite name="CodebarAg Test Suite">
+        <testsuite name="codebar Solutions AG Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
