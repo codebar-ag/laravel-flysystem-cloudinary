@@ -14,7 +14,7 @@ use Mockery\MockInterface;
 
 class AdapterTest extends TestCase
 {
-    public FlysystemCloudinaryAdapter $adapter;
+    // public FlysystemCloudinaryAdapter $adapter;
 
     protected function setUp(): void
     {
