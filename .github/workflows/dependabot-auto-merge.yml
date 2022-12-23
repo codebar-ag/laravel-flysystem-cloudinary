@@ -13,7 +13,11 @@ jobs:
     
       - name: Dependabot metadata
         id: metadata
+<<<<<<< HEAD
         uses: dependabot/fetch-metadata@v1.3.5
+=======
+        uses: dependabot/fetch-metadata@v1.3.3
+>>>>>>> 2295dd9 (WIP)
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           

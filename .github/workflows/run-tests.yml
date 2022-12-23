@@ -44,6 +44,7 @@ jobs:
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
       - name: Execute tests
+<<<<<<< HEAD
         run: cp phpunit.xml.dist phpunit.xml
 
       - name: Execute tests
@@ -52,3 +53,6 @@ jobs:
           CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+=======
+        run: vendor/bin/pest
+>>>>>>> 2295dd9 (WIP)
