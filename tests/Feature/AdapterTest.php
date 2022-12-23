@@ -255,24 +255,6 @@ class AdapterTest extends TestCase
     }
 
     /** @test */
-    public function it_can_read()
-    {
-        Http::fake(['*' => Http::response('::content::')]);
-        $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
-            $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
-                'secure_url' => '::url::',
-            ], []));
-        });
-        $adapter = new FlysystemCloudinaryAdapter($mock);
-
-        $meta = $adapter->read('::path::');
-
-        $this->assertSame('::content::', $meta['contents']);
-        $this->assertArrayNotHasKey('stream', $meta);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
-    }
-
-    /** @test */
     public function it_can_read_stream()
     {
         Http::fake();
@@ -308,78 +290,6 @@ class AdapterTest extends TestCase
 
         $this->assertSame([], $files);
         Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 4);
-    }
-
-    /** @test */
-    public function it_can_get_metadata()
-    {
-        Http::fake();
-        $publicId = '::file-path::';
-        $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) use ($publicId) {
-            $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
-                'public_id' => $publicId,
-                'secure_url' => '::url::',
-            ], []));
-        });
-        $adapter = new FlysystemCloudinaryAdapter($mock);
-
-        $meta = $adapter->getMetadata($publicId);
-
-        $this->assertSame($publicId, $meta['path']);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
-    }
-
-    /** @test */
-    public function it_can_get_size()
-    {
-        Http::fake();
-        $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
-            $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
-                'bytes' => 789,
-                'secure_url' => '::url::',
-            ], []));
-        });
-        $adapter = new FlysystemCloudinaryAdapter($mock);
-
-        $meta = $adapter->getSize('::path::');
-
-        $this->assertSame(789, $meta['size']);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
-    }
-
-    /** @test */
-    public function it_can_get_mimetype()
-    {
-        Http::fake();
-        $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
-            $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
-                'secure_url' => '::url::',
-            ], []));
-        });
-        $adapter = new FlysystemCloudinaryAdapter($mock);
-
-        $meta = $adapter->getMimetype('::path::');
-
-        $this->assertSame('text/plain', $meta['mimetype']);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
-    }
-
-    /** @test */
-    public function it_can_get_timestamp()
-    {
-        Http::fake();
-        $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
-            $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
-                'created_at' => '2021-10-10T10:10:10Z',
-                'secure_url' => '::url::',
-            ], []));
-        });
-        $adapter = new FlysystemCloudinaryAdapter($mock);
-
-        $meta = $adapter->getTimestamp('::path::');
-
-        $this->assertSame(1633860610, $meta['timestamp']);
-        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
     }
 
     /** @test */

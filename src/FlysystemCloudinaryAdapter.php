@@ -7,7 +7,9 @@ use Cloudinary\Api\Exception\ApiError;
 use Cloudinary\Api\Exception\BadRequest;
 use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Api\Exception\RateLimited;
+use Cloudinary\Asset\Media;
 use Cloudinary\Cloudinary;
+use Cloudinary\Configuration\Configuration;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use Exception;
 use Illuminate\Http\Client\RequestException;
@@ -17,13 +19,27 @@ use Illuminate\Support\Str;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\UnableToMoveFile;
+use League\Flysystem\UnableToRetrieveMetadata;
+use League\Flysystem\UnableToSetVisibility;
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
+use Throwable;
 
 class FlysystemCloudinaryAdapter implements FilesystemAdapter
 {
+    private const EXTRA_METADATA_FIELDS = [
+        'version',
+        'width',
+        'height',
+        'url',
+        'secure_url',
+        'next_cursor',
+    ];
+
     public function __construct(
         public Cloudinary $cloudinary,
     ) {
+        Configuration::instance($cloudinary->configuration);
     }
 
     /**
@@ -274,6 +290,17 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         ];
     }
 
+    public function move(string $source, string $destination, Config $config): void
+    {
+        try {
+            $this->cloudinary
+                ->uploadApi()
+                ->rename($source, $destination);
+        } catch (NotFound $exception) {
+            throw UnableToMoveFile::fromLocationTo($source, $destination, $exception);
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -299,9 +326,13 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
-        $meta = $this->readObject($path);
+        try {
+            $contents = file_get_contents(Media::fromParams($path));
+        } catch (Exception) {
+            $contents = '';
+        }
 
-        return $meta;
+        return (string) $contents;
     }
 
     /**
@@ -433,42 +464,45 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getMetadata($path): array|false
+    private function getMetadata(string $path, string $type): FileAttributes
     {
-        $meta = $this->readObject($path);
-
-        if ($meta === false) {
-            return false;
+        try {
+            $result = (array) $this->cloudinary->adminApi()->asset($path);
+        } catch (Throwable $exception) {
+            throw UnableToRetrieveMetadata::create($path, $type, '', $exception);
         }
 
-        return $meta;
+        $attributes = $this->mapToFileAttributes($result, $path);
+
+        if (!$attributes instanceof FileAttributes) {
+            throw UnableToRetrieveMetadata::create($path, $type);
+        }
+
+        return $attributes;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getSize($path): array|false
+    private function mapToFileAttributes($resource): FileAttributes
     {
-        return $this->getMetadata($path);
+        return new FileAttributes(
+            $resource['public_id'],
+            (int) $resource['bytes'],
+            'public',
+            (int) strtotime($resource['created_at']),
+            (string) sprintf('%s/%s', $resource['resource_type'] , $resource['format']),
+            $this->extractExtraMetadata((array) $resource)
+        );
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getMimetype($path): array|false
+    private function extractExtraMetadata(array $metadata): array
     {
-        return $this->getMetadata($path);
-    }
+        $extracted = [];
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getTimestamp($path): array|false
-    {
-        return $this->getMetadata($path);
+        foreach (static::EXTRA_METADATA_FIELDS as $field) {
+            if (isset($metadata[$field]) && $metadata[$field] !== '') {
+                $extracted[$field] = $metadata[$field];
+            }
+        }
+
+        return $extracted;
     }
 
     public function getUrl(string $path): string|false
@@ -607,46 +641,81 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     public function directoryExists(string $path): bool
     {
-        // TODO: Implement directoryExists() method.
+        $folders = [];
+        $needle = substr($path, 0, strripos($path, '/'));
+
+        $response = null;
+        do {
+            $response = (array) $this->cloudinary->adminApi()->subFolders($needle, [
+                'max_results' => 4,
+                'next_cursor' => isset($response['next_cursor']) ? $response['next_cursor'] : null,
+            ]);
+
+            $folders = array_merge($folders, $response['folders']);
+        } while (array_key_exists('next_cursor', $response) && !is_null($response['next_cursor']));
+
+        $folders_found = array_filter(
+            $folders,
+            function ($e) use ($path) {
+                return $e['path'] == $path;
+            }
+        );
+
+        return count($folders_found);
     }
 
     public function deleteDirectory(string $path): void
     {
-        // TODO: Implement deleteDirectory() method.
+        $this->cloudinary->adminApi()->deleteFolder($path);
     }
 
     public function createDirectory(string $path, Config $config): void
     {
-        // TODO: Implement createDirectory() method.
+        $this->cloudinary->adminApi()->createFolder($path);
     }
 
     public function setVisibility(string $path, string $visibility): void
     {
-        // TODO: Implement setVisibility() method.
+        throw UnableToSetVisibility::atLocation($path, 'Adapter does not support visibility controls.');
+    }
+
+    public function getMimetype($path): string
+    {
+        return $this->mimeType($path)->mimeType();
+    }
+
+    public function getVisibility($path): string
+    {
+        return $this->visibility($path)->visibility();
+    }
+
+    public function getTimestamp($path): string
+    {
+        return $this->lastModified($path)->lastModified();
+    }
+
+    public function getSize($path): string
+    {
+        return $this->fileSize($path)->fileSize();
     }
 
     public function visibility(string $path): FileAttributes
     {
-        // TODO: Implement visibility() method.
+        return $this->getMetadata($path, FileAttributes::ATTRIBUTE_VISIBILITY);
     }
 
     public function mimeType(string $path): FileAttributes
     {
-        // TODO: Implement mimeType() method.
+        return $this->getMetadata($path, FileAttributes::ATTRIBUTE_MIME_TYPE);
     }
 
     public function lastModified(string $path): FileAttributes
     {
-        // TODO: Implement lastModified() method.
+        return $this->getMetadata($path, FileAttributes::ATTRIBUTE_LAST_MODIFIED);
     }
 
     public function fileSize(string $path): FileAttributes
     {
-        // TODO: Implement fileSize() method.
-    }
-
-    public function move(string $source, string $destination, Config $config): void
-    {
-        // TODO: Implement move() method.
+        return $this->getMetadata($path, FileAttributes::ATTRIBUTE_FILE_SIZE);
     }
 }
