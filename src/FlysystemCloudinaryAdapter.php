@@ -28,8 +28,11 @@ use Throwable;
 class FlysystemCloudinaryAdapter implements FilesystemAdapter
 {
     public array|false $meta;
+
     public bool $copied;
+
     public bool $deleted;
+
     private const EXTRA_METADATA_FIELDS = [
         'version',
         'width',
