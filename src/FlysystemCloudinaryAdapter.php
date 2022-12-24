@@ -344,7 +344,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function readStream($path): array|false
+    public function readStream($path): array|false /** @phpstan-ignore-line */
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -655,11 +655,11 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         do {
             $response = (array) $this->cloudinary->adminApi()->subFolders($needle, [
                 'max_results' => 4,
-                'next_cursor' => isset($response['next_cursor']) ? $response['next_cursor'] : null,
+                'next_cursor' => isset($response['next_cursor']) ? $response['next_cursor'] : null, /** @phpstan-ignore-line */
             ]);
 
-            $folders = array_merge($folders, $response['folders']);
-        } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor']));
+            $folders = array_merge($folders, $response['folders']); /** @phpstan-ignore-line */
+        } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor'])); /** @phpstan-ignore-line */
 
         $folders_found = array_filter(
             $folders,
