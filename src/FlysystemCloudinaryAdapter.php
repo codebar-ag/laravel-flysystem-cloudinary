@@ -660,7 +660,6 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
             $folders = array_merge($folders, $response['folders']); /** @phpstan-ignore-line */
         } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor'])); /** @phpstan-ignore-line */
-
         $folders_found = array_filter(
             $folders,
             function ($e) use ($path) {
