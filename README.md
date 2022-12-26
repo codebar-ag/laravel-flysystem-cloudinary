@@ -2,8 +2,9 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/codebar-ag/laravel-flysystem-cloudinary.svg?style=flat-square)](https://packagist.org/packages/codebar-ag/laravel-flysystem-cloudinary)
 [![Total Downloads](https://img.shields.io/packagist/dt/codebar-ag/laravel-flysystem-cloudinary.svg?style=flat-square)](https://packagist.org/packages/codebar-ag/laravel-flysystem-cloudinary)
-[![run-tests](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml/badge.svg)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml)
-[![Check & fix styling](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/php-cs-fixer.yml/badge.svg)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/php-cs-fixer.yml)
+[![run-tests](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml)
+[![PHPStan](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/phpstan.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/phpstan.yml)
+[![Fix PHP code style issues](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml)
 
 ## 💡 What is Cloudinary?
 
