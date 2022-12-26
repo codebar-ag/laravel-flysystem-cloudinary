@@ -27,6 +27,12 @@ use Throwable;
 
 class FlysystemCloudinaryAdapter implements FilesystemAdapter
 {
+    public array|false $meta;
+
+    public bool $copied;
+
+    public bool $deleted;
+
     private const EXTRA_METADATA_FIELDS = [
         'version',
         'width',
@@ -338,7 +344,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * {@inheritDoc}
      */
-    public function readStream($path): array|false
+    public function readStream($path): array|false /** @phpstan-ignore-line */
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
@@ -472,7 +478,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             throw UnableToRetrieveMetadata::create($path, $type, '', $exception);
         }
 
-        $attributes = $this->mapToFileAttributes($result, $path);
+        $attributes = $this->mapToFileAttributes($result);
 
         if (! $attributes instanceof FileAttributes) {
             throw UnableToRetrieveMetadata::create($path, $type);
@@ -497,7 +503,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     {
         $extracted = [];
 
-        foreach (static::EXTRA_METADATA_FIELDS as $field) {
+        foreach (self::EXTRA_METADATA_FIELDS as $field) {
             if (isset($metadata[$field]) && $metadata[$field] !== '') {
                 $extracted[$field] = $metadata[$field];
             }
@@ -649,12 +655,11 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         do {
             $response = (array) $this->cloudinary->adminApi()->subFolders($needle, [
                 'max_results' => 4,
-                'next_cursor' => isset($response['next_cursor']) ? $response['next_cursor'] : null,
+                'next_cursor' => isset($response['next_cursor']) ? $response['next_cursor'] : null, /** @phpstan-ignore-line */
             ]);
 
-            $folders = array_merge($folders, $response['folders']);
-        } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor']));
-
+            $folders = array_merge($folders, $response['folders']); /** @phpstan-ignore-line */
+        } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor'])); /** @phpstan-ignore-line */
         $folders_found = array_filter(
             $folders,
             function ($e) use ($path) {
@@ -662,7 +667,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             }
         );
 
-        return count($folders_found);
+        return count($folders_found) > 0;
     }
 
     public function deleteDirectory(string $path): void
@@ -690,12 +695,12 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         return $this->visibility($path)->visibility();
     }
 
-    public function getTimestamp($path): string
+    public function getTimestamp($path): int
     {
         return $this->lastModified($path)->lastModified();
     }
 
-    public function getSize($path): string
+    public function getSize($path): int
     {
         return $this->fileSize($path)->fileSize();
     }
