@@ -23,7 +23,8 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "illuminate/contracts": "^9.0",
         "spatie/laravel-package-tools": "^1.9.2",
-        "cloudinary/cloudinary_php": "^2.9.0"
+        "cloudinary/cloudinary_php": "^2.9.0",
+        "nesbot/carbon": "^2.64.0"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
