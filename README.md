@@ -19,6 +19,7 @@ additional parameters to your url 😉
 
 | Package 	 | PHP 	  | Laravel 	   | Flysystem 	 |
 |-----------|--------|-------------|-------------|
+| >v3.0        | >8.2    | > Laravel 10  | > 3.0         |
 | >v2.0 	   | >8.1 	 | > Laravel 9 	 | > 3.0 	     |
 | >v1.0 	   | >8.0 	 | > Laravel 8 	 | > 1.1 	     |
 
