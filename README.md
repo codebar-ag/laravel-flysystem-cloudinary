@@ -218,7 +218,7 @@ return [
     */
 
     'secure_url' => (bool) env('CLOUDINARY_SECURE_URL', true),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Cloudinary Global Upload Options
@@ -231,9 +231,8 @@ return [
     */
 
     'options' => [
-        //
+        // 'async' => true,
     ],
-
 ];
 ```
 
