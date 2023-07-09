@@ -53,7 +53,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function write(string $path, string $contents, Config $config): void
     {
-        $this->meta = $this->upload($path, $contents);
+        $this->meta = $this->upload($path, $contents, $config);
     }
 
     /**
@@ -61,7 +61,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function writeStream(string $path, $resource, Config $config): void
     {
-        $this->meta = $this->upload($path, $resource);
+        $this->meta = $this->upload($path, $resource, $config);
     }
 
     /**
@@ -69,7 +69,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function update($path, $contents, Config $config): array|false
     {
-        return $this->upload($path, $contents);
+        return $this->upload($path, $contents, $config);
     }
 
     /**
@@ -77,7 +77,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function updateStream($path, $resource, Config $config): array|false
     {
-        return $this->upload($path, $resource);
+        return $this->upload($path, $resource, $config);
     }
 
     /**
@@ -87,7 +87,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      *
      * @param  string|resource  $body
      */
-    protected function upload(string $path, $body): array|false
+    protected function upload(string $path, $body, Config $config): array|false
     {
         if (is_string($body)) {
             $tempFile = tmpfile();
@@ -114,6 +114,14 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
         if (config('flysystem-cloudinary.upload_preset')) {
             $options['upload_preset'] = config('flysystem-cloudinary.upload_preset');
+        }
+
+        if (config('flysystem-cloudinary.options')) {
+            $options = array_merge($options, config('flysystem-cloudinary.options'));
+        }
+
+        if ($config->get('options')) {
+            $options = array_merge($options, $config->get('options'));
         }
 
         try {
@@ -176,7 +184,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             return;
         }
 
-        $metaUpload = $this->upload($newpath, $metaRead['contents']);
+        $metaUpload = $this->upload($newpath, $metaRead['contents'], $config);
 
         if ($metaUpload === false) {
             $this->copied = false;

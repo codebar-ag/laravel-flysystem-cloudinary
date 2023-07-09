@@ -41,4 +41,18 @@ return [
 
     'secure_url' => (bool) env('CLOUDINARY_SECURE_URL', true),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cloudinary Global Upload Options
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify the upload options that will be applied to all
+    | your assets. This will be merged with the options that you may
+    | define in the `Storage::disk('cloudinary')` call.
+    |
+    */
+
+    'options' => [
+        // 'async' => true,
+    ],
 ];

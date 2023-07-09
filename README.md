@@ -93,19 +93,7 @@ https://res.cloudinary.com/my-cloud-name/image/upload/v1/cat.jpg
 
 ### 🪐 How to use with Nova
 
-To customize the name of the stored file, you may use the `storeAs` methods
-of the `Image` field:
-
-```php
-use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Fields\Image;
-
-Image::make('Image')
-    ->disk('cloudinary')
-    ->storeAs(function (NovaRequest $request) {
-        return sha1($request->image->getClientOriginalName());
-    }),
-```
+We have a package for use with Laravel Nova: [Laravel Flysystem Cloudinary Nova](https://github.com/codebar-ag/laravel-flysystem-cloudinary-nova)
 
 ## 🗂 How to use folder prefix
 
@@ -156,6 +144,26 @@ Keep this in mind because the admin API is rate limited to 500 calls per hour.
 
 The package does check in following sequence:
 - `image` ➡️ `raw` ➡️ `video`
+
+## ⚙️ Optional Parameters
+
+Cloudinary has a lot of optional parameters to customize the upload.
+You can find all options in the [official documentation](https://cloudinary.com/documentation/image_upload_api_reference#upload_optional_parameters) optional parameters section.
+
+You can pass all parameters as an array to the `put`  method:
+
+```php
+use Illuminate\Support\Facades\Storage;
+
+Storage::disk('cloudinary')->put('meow', $contents, [
+    'options' [
+        'notification_url' => 'https://mysite.example.com/notify_endpoint',
+        'async' => true,
+    ]
+]);
+```
+
+`Note: if you find yourself using the same parameters for all requests, you should consider adding them to the config file. (see below)`
 
 ## 🔧 Configuration file
 
@@ -210,6 +218,21 @@ return [
     */
 
     'secure_url' => (bool) env('CLOUDINARY_SECURE_URL', true),
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Cloudinary Global Upload Options
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify the upload options that will be applied to all
+    | your assets. This will be merged with the options that you may
+    | define in the `Storage::disk('cloudinary')` call.
+    |
+    */
+
+    'options' => [
+        //
+    ],
 
 ];
 ```
