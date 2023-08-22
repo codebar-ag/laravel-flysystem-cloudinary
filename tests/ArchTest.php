@@ -1,6 +1,5 @@
 <?php
 
-test('it will not use any debug function')
-    ->expect(['dd', 'ray', 'dump'])
-    ->not()
-    ->toBeUsed();
+it('will not use debugging functions')
+    ->expect(['dd', 'dump', 'ray'])
+    ->each->not->toBeUsed();
