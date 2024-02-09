@@ -10,7 +10,6 @@ use Cloudinary\Api\Exception\RateLimited;
 use Cloudinary\Asset\Media;
 use Cloudinary\Cloudinary;
 use Cloudinary\Configuration\Configuration;
-use Cloudinary\Transformation\Resize;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use Exception;
 use Illuminate\Http\Client\RequestException;
@@ -524,10 +523,8 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     /**
      * Get the URL of an image with optional transformation parameters
      *
-     * @param  string|array $path
      * @return string
      */
-
     public function getUrl(string|array $path): string|false
     {
         $options = [];
