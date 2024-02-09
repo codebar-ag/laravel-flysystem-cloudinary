@@ -10,6 +10,7 @@ use Cloudinary\Api\Exception\RateLimited;
 use Cloudinary\Asset\Media;
 use Cloudinary\Cloudinary;
 use Cloudinary\Configuration\Configuration;
+use Cloudinary\Transformation\Resize;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use Exception;
 use Illuminate\Http\Client\RequestException;
@@ -520,12 +521,26 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         return $extracted;
     }
 
-    public function getUrl(string $path): string|false
+    /**
+     * Get the URL of an image with optional transformation parameters
+     *
+     * @param  string|array $path
+     * @return string
+     */
+
+    public function getUrl(string|array $path): string|false
     {
+        $options = [];
+
+        if (is_array($path)) {
+            $options = $path['options'] ?? [];
+            $path = $path['path'];
+        }
+
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         try {
-            return (string) $this->cloudinary->image($path)->toUrl();
+            return (string) $this->cloudinary->image($path)->toUrl(implode(',', $options));
         } catch (NotFound) {
             return false;
         }

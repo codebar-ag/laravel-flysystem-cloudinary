@@ -323,3 +323,33 @@ it('can get url', function () {
     expect($url)->toContain('http://', '::path::')
         ->not->toContain('https://');
 });
+
+it('can get url with option', function () {
+    // Secure URL
+
+    $cloudinary = new Cloudinary([
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+        'api_key' => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET'),
+        'url' => [
+            'secure' => true,
+        ],
+    ]);
+
+    $adapter = new FlysystemCloudinaryAdapter($cloudinary);
+
+    $url = $adapter->getUrl([
+        'path' => '::path::',
+        'options' => [
+            'w_64',
+            'h_64',
+            'c_fill',
+            'auto',
+        ],
+    ]);
+
+    expect($url)
+        ->toContain('https://', '::path::')
+        ->toContain('w_64', 'h_64', 'c_fill', 'auto')
+        ->not->toContain('http://');
+});
