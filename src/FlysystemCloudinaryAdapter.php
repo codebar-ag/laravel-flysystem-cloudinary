@@ -525,6 +525,17 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         try {
+            return (string) $this->cloudinary->image($path)->toUrl();
+        } catch (NotFound) {
+            return false;
+        }
+    }
+
+    public function getUrlViaRequest(string $path): string|false
+    {
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
+        try {
             $response = $this->explicit($path);
         } catch (NotFound) {
             return false;

@@ -269,7 +269,7 @@ it('can list directory contents', function () {
     Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 4);
 });
 
-it('can get url', function () {
+it('can get url via request', function () {
     Http::fake();
     $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
         $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
@@ -279,8 +279,47 @@ it('can get url', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $url = $adapter->getUrl('::path::');
+    $url = $adapter->getUrlViaRequest('::path::');
 
     $this->assertSame('::secure-url::', $url);
     Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 2);
+});
+
+it('can get url', function () {
+    // Secure URL
+
+    $cloudinary = new Cloudinary([
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+        'api_key' => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET'),
+        'url' => [
+            'secure' => true,
+        ],
+    ]);
+
+    $adapter = new FlysystemCloudinaryAdapter($cloudinary);
+
+    $url = $adapter->getUrl('::path::');
+
+    expect($url)
+        ->toContain('https://', '::path::')
+        ->not->toContain('http://');
+
+    // Unsecure URL
+
+    $cloudinary = new Cloudinary([
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+        'api_key' => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET'),
+        'url' => [
+            'secure' => false,
+        ],
+    ]);
+
+    $adapter = new FlysystemCloudinaryAdapter($cloudinary);
+
+    $url = $adapter->getUrl('::path::');
+
+    expect($url)->toContain('http://', '::path::')
+        ->not->toContain('https://');
 });
