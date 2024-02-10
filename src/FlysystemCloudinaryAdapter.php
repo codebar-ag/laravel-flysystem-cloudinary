@@ -520,7 +520,30 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         return $extracted;
     }
 
-    public function getUrl(string $path): string|false
+    /**
+     * Get the URL of an image with optional transformation parameters
+     *
+     * @return string
+     */
+    public function getUrl(string|array $path): string|false
+    {
+        $options = [];
+
+        if (is_array($path)) {
+            $options = $path['options'] ?? [];
+            $path = $path['path'];
+        }
+
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
+        try {
+            return (string) $this->cloudinary->image($path)->toUrl(implode(',', $options));
+        } catch (NotFound) {
+            return false;
+        }
+    }
+
+    public function getUrlViaRequest(string $path): string|false
     {
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
