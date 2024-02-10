@@ -17,9 +17,10 @@ additional parameters to your url 😉
 
 - Cloudinary Account
 
-| Package 	 | PHP 	  | Laravel 	   | Flysystem 	 |
-|-----------|--------|-------------|-------------|
-| >v3.0        | >8.2    | > Laravel 10  | > 3.0         |
+| Package 	 | PHP 	  | Laravel 	     | Flysystem 	 |
+|-----------|--------|---------------|-------------|
+| >v4.0     | >8.3   | > Laravel 11  | > 3.0       |
+| >v3.0     | >8.2   | > Laravel 10  | > 3.0       |
 | >v2.0 	   | >8.1 	 | > Laravel 9 	 | > 3.0 	     |
 | >v1.0 	   | >8.0 	 | > Laravel 8 	 | > 1.1 	     |
 
@@ -93,7 +94,8 @@ https://res.cloudinary.com/my-cloud-name/image/upload/v1/cat.jpg
 
 ### 🪐 How to use with Nova
 
-We have a package for use with Laravel Nova: [Laravel Flysystem Cloudinary Nova](https://github.com/codebar-ag/laravel-flysystem-cloudinary-nova)
+We have a package for use with Laravel
+Nova: [Laravel Flysystem Cloudinary Nova](https://github.com/codebar-ag/laravel-flysystem-cloudinary-nova)
 
 ## 🗂 How to use folder prefix
 
@@ -143,12 +145,15 @@ their own with a separate request.
 Keep this in mind because the admin API is rate limited to 500 calls per hour.
 
 The package does check in following sequence:
+
 - `image` ➡️ `raw` ➡️ `video`
 
 ## ⚙️ Optional Parameters
 
 Cloudinary has a lot of optional parameters to customize the upload.
-You can find all options in the [official documentation](https://cloudinary.com/documentation/image_upload_api_reference#upload_optional_parameters) optional parameters section.
+You can find all options in
+the [official documentation](https://cloudinary.com/documentation/image_upload_api_reference#upload_optional_parameters)
+optional parameters section.
 
 You can pass all parameters as an array to the `put`  method:
 
@@ -239,6 +244,7 @@ return [
 ## 🚧 Testing
 
 Run the tests:
+
 ```shell
 composer test
 ```
