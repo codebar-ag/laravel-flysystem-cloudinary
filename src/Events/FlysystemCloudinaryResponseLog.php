@@ -15,6 +15,5 @@ class FlysystemCloudinaryResponseLog
 
     public function __construct(
         public ApiResponse $response,
-    ) {
-    }
+    ) {}
 }

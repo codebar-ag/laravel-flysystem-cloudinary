@@ -655,7 +655,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         return [
             'contents' => $body,
             'etag' => Arr::get($response, 'etag'),
-            'mimetype' => (new FinfoMimeTypeDetector())->detectMimeType($path, $body) ?? 'text/plain',
+            'mimetype' => (new FinfoMimeTypeDetector)->detectMimeType($path, $body) ?? 'text/plain',
             'path' => $path,
             'size' => Arr::get($response, 'bytes'),
             'timestamp' => strtotime(Arr::get($response, 'created_at')),
@@ -668,6 +668,8 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     public function fileExists(string $path): bool
     {
+        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
         try {
             $this->cloudinary->adminApi()->asset($path);
         } catch (Exception $e) {

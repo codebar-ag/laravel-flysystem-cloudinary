@@ -40,7 +40,7 @@ it('can write', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $adapter->write($publicId, $contents, new Config());
+    $adapter->write($publicId, $contents, new Config);
 
     $this->assertSame($contents, $adapter->meta['contents']);
     $this->assertSame('::etag::', $adapter->meta['etag']);
@@ -71,7 +71,7 @@ it('can write stream', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $adapter->writeStream($publicId, $contents, new Config());
+    $adapter->writeStream($publicId, $contents, new Config);
 
     $this->assertSame($contents, $adapter->meta['contents']);
     $this->assertSame('::etag::', $adapter->meta['etag']);
@@ -102,7 +102,7 @@ it('can update', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $meta = $adapter->update($publicId, $contents, new Config());
+    $meta = $adapter->update($publicId, $contents, new Config);
 
     $this->assertSame($contents, $meta['contents']);
     $this->assertSame('::etag::', $meta['etag']);
@@ -133,7 +133,7 @@ it('can update stream', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $meta = $adapter->updateStream($publicId, $contents, new Config());
+    $meta = $adapter->updateStream($publicId, $contents, new Config);
 
     $this->assertSame($contents, $meta['contents']);
     $this->assertSame('::etag::', $meta['etag']);
@@ -170,7 +170,7 @@ it('can copy', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $adapter->copy('::from-path::', '::to-path::', new Config());
+    $adapter->copy('::from-path::', '::to-path::', new Config);
 
     $this->assertTrue($adapter->copied);
     Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 2);
@@ -214,7 +214,7 @@ it('can create a directory', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $meta = $adapter->createDir('::path::', new Config());
+    $meta = $adapter->createDir('::path::', new Config);
 
     $this->assertSame([
         'path' => '::path::',
