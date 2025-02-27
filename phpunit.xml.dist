@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.2/phpunit.xsd" backupGlobals="false"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd" backupGlobals="false"
          bootstrap="vendor/autoload.php" colors="true" processIsolation="false" stopOnFailure="false"
          executionOrder="random" failOnWarning="true" failOnRisky="true" failOnEmptyTestSuite="true"
          beStrictAboutOutputDuringTests="true" cacheDirectory=".phpunit.cache" backupStaticProperties="false">
@@ -16,7 +16,11 @@
             <clover outputFile="build/logs/clover.xml"/>
         </report>
     </coverage>
+    <logging>
+        <junit outputFile="build/report.junit.xml"/>
+    </logging>
     <php>
+        <env name="APP_KEY" value="base64:F+mHMDBbavrsp/I3WYA5lDSwDJJI/0wQG4eM3csq/lo="/>
         <env name="FILESYSTEM_DRIVER" value="cloudinary"/>
         <env name="CLOUDINARY_CLOUD_NAME" value="cloudinary_cloud_name"/>
         <env name="CLOUDINARY_API_KEY" value="cloudinary_api_key"/>
