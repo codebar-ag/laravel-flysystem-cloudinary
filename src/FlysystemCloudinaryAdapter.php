@@ -341,7 +341,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         try {
-            $contents = file_get_contents(Media::fromParams($path, []));
+            $contents = file_get_contents(Media::fromParams($path));
         } catch (Exception) {
             $contents = '';
         }
