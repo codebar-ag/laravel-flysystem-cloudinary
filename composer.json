@@ -12,32 +12,33 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Sebastian Fix",
-            "email": "sebastian.fix@codebar.ch",
+            "name": "Sebastian Bürgin-Fix",
+            "email": "sebastian.buergin@buergin.ch",
             "homepage": "https://www.codebar.ch",
-            "role": "Software Engineer"
+            "role": "Sofware-Engineer"
+        },
+        {
+            "name": "Rhys Lees",
+            "role": "Software-Engineer"
         }
     ],
     "require": {
-        "php": ">=8.2",
+        "php": "8.2.*|8.3.*|8.4.*",
         "guzzlehttp/guzzle": "^7.8",
-        "illuminate/contracts": "^11.0",
-        "spatie/laravel-package-tools": "^1.16",
-        "cloudinary/cloudinary_php": "^2.13",
-        "nesbot/carbon": "^2.72"
+        "illuminate/contracts": "^12.0",
+        "cloudinary/cloudinary_php": "^3.1",
+        "nesbot/carbon": "^3.8",
+        "spatie/laravel-package-tools": "^1.19"
     },
     "require-dev": {
-        "laravel/pint": "^1.14",
-        "nunomaduro/collision": "^8.1",
-        "larastan/larastan": "^2.9",
-        "orchestra/testbench": "^9.0",
-        "pestphp/pest": "^2.34",
-        "pestphp/pest-plugin-arch": "^2.7",
-        "pestphp/pest-plugin-laravel": "^2.3",
-        "phpstan/extension-installer": "^1.3",
-        "phpstan/phpstan-deprecation-rules": "^1.1",
-        "phpstan/phpstan-phpunit": "^1.3",
-        "spatie/laravel-ray": "^1.35"
+        "laravel/pint": "^1.21",
+        "larastan/larastan": "^v3.1",
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^3.7",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "spatie/laravel-ray": "^1.39"
     },
     "autoload": {
         "psr-4": {
