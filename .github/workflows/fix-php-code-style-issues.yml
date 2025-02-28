@@ -1,12 +1,6 @@
 name: Fix PHP code style issues
 
-on:
-  push:
-    paths:
-      - '**.php'
-
-permissions:
-  contents: write
+on: [push]
 
 jobs:
   php-code-styling:

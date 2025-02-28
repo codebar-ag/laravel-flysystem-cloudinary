@@ -488,6 +488,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
         $attributes = $this->mapToFileAttributes($result);
 
+        // @phpstan-ignore-next-line
         if (! $attributes instanceof FileAttributes) {
             throw UnableToRetrieveMetadata::create($path, $type);
         }
@@ -688,11 +689,11 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         do {
             $response = (array) $this->cloudinary->adminApi()->subFolders($needle, [
                 'max_results' => 4,
-                'next_cursor' => isset($response['next_cursor']) ? $response['next_cursor'] : null, /** @phpstan-ignore-line */
+                'next_cursor' => $response['next_cursor'] ?? null,
             ]);
 
-            $folders = array_merge($folders, $response['folders']); /** @phpstan-ignore-line */
-        } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor'])); /** @phpstan-ignore-line */
+            $folders = array_merge($folders, $response['folders']);
+        } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor']));
         $folders_found = array_filter(
             $folders,
             function ($e) use ($path) {

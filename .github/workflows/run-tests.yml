@@ -11,11 +11,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
+      max-parallel: 1
       matrix:
         os: [ ubuntu-latest ]
-        php: [ 8.3 ]
-        laravel: [ 11.* ]
-        stability: [ prefer-stable ]
+        php: [ 8.2, 8.3, 8.4 ]
+        laravel: [ 12.* ]
+        stability: [ prefer-lowest, prefer-stable ]
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
@@ -40,7 +41,7 @@ jobs:
           composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
-      - name: Set phpunit.xml
+      - name: Execute tests
         run: cp phpunit.xml.dist phpunit.xml
 
       - name: Execute tests
@@ -50,3 +51,9 @@ jobs:
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
 
+      - name: Store Log Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Store report artifacts
+          path: ./vendor/orchestra/testbench-core/laravel/storage/logs

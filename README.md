@@ -1,10 +1,9 @@
 <img src="https://banners.beyondco.de/Laravel%20Flysystem%20Cloudinary.png?theme=light&packageManager=composer+require&packageName=codebar-ag%2Flaravel-flysystem-cloudinary&pattern=circuitBoard&style=style_2&description=An+opinionated+way+to+integrate+Cloudinary+with+the+Laravel+filesystem&md=1&showWatermark=0&fontSize=150px&images=cloud&widths=500&heights=500">
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/codebar-ag/laravel-flysystem-cloudinary.svg?style=flat-square)](https://packagist.org/packages/codebar-ag/laravel-flysystem-cloudinary)
+[![GitHub-Tests](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml)
+[![GitHub Code Style](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/codebar-ag/laravel-flysystem-cloudinary.svg?style=flat-square)](https://packagist.org/packages/codebar-ag/laravel-flysystem-cloudinary)
-[![run-tests](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml)
-[![PHPStan](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/phpstan.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/phpstan.yml)
-[![Fix PHP code style issues](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml)
 
 ## 💡 What is Cloudinary?
 
@@ -17,12 +16,15 @@ additional parameters to your url 😉
 
 - Cloudinary Account
 
-| Package 	 | PHP 	  | Laravel 	     | Flysystem 	 |
-|-----------|--------|---------------|-------------|
-| >v4.0     | >8.3   | > Laravel 11  | > 3.0       |
-| >v3.0     | >8.2   | > Laravel 10  | > 3.0       |
-| >v2.0 	   | >8.1 	 | > Laravel 9 	 | > 3.0 	     |
-| >v1.0 	   | >8.0 	 | > Laravel 8 	 | > 1.1 	     |
+| Package 	 | PHP 	       | Laravel 	 | Flysystem 	 |
+|-----------|-------------|-----------|-------------|
+| v12.0     | ^8.2 - ^8.4 | 12.x      | 3.25.1      |
+| v11.0     | ^8.2 - ^8.3 | 11.x      | 3.0         |
+| v4.0      | ^8.2 - ^8.3 | 11.x      | 3.0         |
+| v3.0      | 8.2         | 10.x      | 3.0         |
+| v2.0 	    | 8.1 	       | 9.x 	     | 3.0 	       |
+| v1.0 	    | 8.0 	       | 8.x 	     | 1.1 	       |
+
 
 ## ⚙️ Installation
 
