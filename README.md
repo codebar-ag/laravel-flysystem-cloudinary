@@ -130,11 +130,26 @@ https://res.cloudinary.com/my-cloud-name/image/upload/v1/client_cat/meow.jpg
 In the Media Library it is stored in `client_cat/meow` and you can retrieve
 the image with `meow`:
 
-```
+```php
 use Illuminate\Support\Facades\Storage;
 
-Storage::disk('cloudinary')->getUrl('meow');
+Storage::disk('cloudinary')->getAdapter()->getUrl('meow');
 ```
+
+You can use Cloudinary tranformation and options when retrieving the image:
+
+```php
+use Illuminate\Support\Facades\Storage;
+
+Storage::disk('cloudinary')->getAdapter()->getUrl([
+    'path' => 'meow',
+    'options => ['w_250', 'h_250', 'c_thumb',]
+);
+```
+
+You can find all options in
+the [official documentation](https://cloudinary.com/documentation/transformation_reference)
+
 
 This should increase the trust to store and retrieve your assets from the
 correct folder.
