@@ -27,7 +27,7 @@ it('can write', function () {
     $publicId = 'file-write-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
 
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     assertUploadResponse($this, $this->adapter->meta, $publicId);
     $this->adapter->delete($publicId); // cleanup
@@ -37,7 +37,7 @@ it('can write stream', function () {
     $publicId = 'file-write-stream-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
 
-    $this->adapter->writeStream($publicId, $fakeImage, new Config());
+    $this->adapter->writeStream($publicId, $fakeImage, new Config);
 
     assertUploadResponse($this, $this->adapter->meta, $publicId);
     $this->adapter->delete($publicId); // cleanup
@@ -47,7 +47,7 @@ it('can update', function () {
     $publicId = 'file-update-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
 
-    $meta = $this->adapter->update($publicId, $fakeImage, new Config());
+    $meta = $this->adapter->update($publicId, $fakeImage, new Config);
 
     assertUploadResponse($this, $meta, $publicId);
     $this->adapter->delete($publicId); // cleanup
@@ -57,7 +57,7 @@ it('can update stream', function () {
     $publicId = 'file-update-stream-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
 
-    $meta = $this->adapter->updateStream($publicId, $fakeImage, new Config());
+    $meta = $this->adapter->updateStream($publicId, $fakeImage, new Config);
 
     assertUploadResponse($this, $meta, $publicId);
     $this->adapter->delete($publicId); // cleanup
@@ -81,7 +81,7 @@ it('can rename', function () {
     $path = 'file-old-path-'.rand();
     $newPath = 'file-new-path-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($path, $fakeImage, new Config());
+    $this->adapter->write($path, $fakeImage, new Config);
 
     $bool = $this->adapter->rename($path, $newPath);
 
@@ -102,8 +102,8 @@ it('does not rename if new path already exists', function () {
     $path = 'file-rename-'.rand();
     $newPath = 'file-already-exists-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($path, $fakeImage, new Config());
-    $this->adapter->write($newPath, $fakeImage, new Config());
+    $this->adapter->write($path, $fakeImage, new Config);
+    $this->adapter->write($newPath, $fakeImage, new Config);
 
     $bool = $this->adapter->rename($path, $newPath);
 
@@ -116,9 +116,9 @@ it('can copy', function () {
     $path = 'file-old-copy-'.rand();
     $newPath = 'file-new-copy-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($path, $fakeImage, new Config());
+    $this->adapter->write($path, $fakeImage, new Config);
 
-    $this->adapter->copy($path, $newPath, new Config());
+    $this->adapter->copy($path, $newPath, new Config);
 
     $this->assertTrue($this->adapter->fileExists($newPath));
     $this->adapter->delete($path); // cleanup
@@ -129,7 +129,7 @@ it('does not copy if file is not found', function () {
     $path = 'file-does-not-exist';
     $newPath = 'file-copied';
 
-    $this->adapter->copy($path, $newPath, new Config());
+    $this->adapter->copy($path, $newPath, new Config);
 
     $this->assertFalse($this->adapter->copied);
 });
@@ -137,7 +137,7 @@ it('does not copy if file is not found', function () {
 it('can delete', function () {
     $publicId = 'file-delete-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $this->adapter->delete($publicId);
 
@@ -147,7 +147,7 @@ it('can delete', function () {
 it('can delete a directory', function () {
     $publicId = 'delete_dir/file-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $bool = $this->adapter->deleteDir('delete_dir');
 
@@ -157,7 +157,7 @@ it('can delete a directory', function () {
 it('can create a directory', function () {
     $directory = 'directory-'.rand();
 
-    $meta = $this->adapter->createDir($directory, new Config());
+    $meta = $this->adapter->createDir($directory, new Config);
 
     $this->assertSame([
         'path' => $directory,
@@ -169,7 +169,7 @@ it('can create a directory', function () {
 it('can check if file exists', function () {
     $publicId = 'file-has-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $bool = $this->adapter->has($publicId);
 
@@ -188,7 +188,7 @@ it('can check if file does not exist', function () {
 it('can read', function () {
     $publicId = 'file-read-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $content = $this->adapter->read($publicId);
 
@@ -199,7 +199,7 @@ it('can read', function () {
 it('can read stream', function () {
     $publicId = 'file-read-stream-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $meta = $this->adapter->readStream($publicId);
 
@@ -233,7 +233,7 @@ it('can list directory contents', function () {
 it('does get size', function () {
     $publicId = 'file-get-size-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $size = $this->adapter->getSize($publicId);
 
@@ -251,7 +251,7 @@ it('does not get size if file is not found', function () {
 it('does get mimetype', function () {
     $publicId = 'file-get-mimetype-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $mimeType = $this->adapter->getMimetype($publicId);
 
@@ -269,7 +269,7 @@ it('does not get mimetype if file is not found', function () {
 it('does get timestamp', function () {
     $publicId = 'file-get-mimetype-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $timeStamp = $this->adapter->getTimestamp($publicId);
 
@@ -287,7 +287,7 @@ it('does not get timestamp if file is not found', function () {
 it('does get visibility', function () {
     $publicId = 'file-get-mimetype-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $visibility = $this->adapter->getVisibility($publicId);
 
@@ -305,7 +305,7 @@ it('does not get visibility if file is not found', function () {
 it('does get url', function () {
     $publicId = 'file-get-url-'.rand();
     $fakeImage = File::image('black.jpg')->getContent();
-    $this->adapter->write($publicId, $fakeImage, new Config());
+    $this->adapter->write($publicId, $fakeImage, new Config);
 
     $url = $this->adapter->getUrl($publicId);
 
@@ -321,8 +321,8 @@ it('can move file', function () {
 
     $this->assertFalse($this->adapter->fileExists($movedToId));
 
-    $this->adapter->write($sourceId, $source, new Config());
-    $this->adapter->move($sourceId, $movedToId, new Config());
+    $this->adapter->write($sourceId, $source, new Config);
+    $this->adapter->move($sourceId, $movedToId, new Config);
 
     $this->assertFalse($this->adapter->fileExists($sourceId));
     $this->assertTrue($this->adapter->fileExists($movedToId));
@@ -334,12 +334,12 @@ it('cant move unexisted file', function () {
 
     $this->assertFalse($this->adapter->fileExists($sourceId));
     $this->expectException(UnableToMoveFile::class);
-    $this->adapter->move($sourceId, $movedToId, new Config());
+    $this->adapter->move($sourceId, $movedToId, new Config);
 });
 
 it('can create and delete directory', function () {
     $directory = 'directory_to_create';
-    $this->adapter->createDirectory($directory, new Config());
+    $this->adapter->createDirectory($directory, new Config);
 
     $this->assertTrue($this->adapter->directoryExists($directory));
 

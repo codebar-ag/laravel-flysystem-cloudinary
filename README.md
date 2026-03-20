@@ -2,9 +2,10 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/codebar-ag/laravel-flysystem-cloudinary.svg?style=flat-square)](https://packagist.org/packages/codebar-ag/laravel-flysystem-cloudinary)
 [![Total Downloads](https://img.shields.io/packagist/dt/codebar-ag/laravel-flysystem-cloudinary.svg?style=flat-square)](https://packagist.org/packages/codebar-ag/laravel-flysystem-cloudinary)
-[![run-tests](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml)
-[![PHPStan](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/phpstan.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/phpstan.yml)
-[![Fix PHP code style issues](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml)
+[![GitHub-Tests](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/run-tests.yml)
+[![GitHub Code Style](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml/badge.svg?branch=main)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/fix-php-code-style-issues.yml)
+[![PHPStan](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/phpstan.yml/badge.svg)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/phpstan.yml)
+[![Dependency Review](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/codebar-ag/laravel-flysystem-cloudinary/actions/workflows/dependency-review.yml)
 
 ## 💡 What is Cloudinary?
 
@@ -17,12 +18,15 @@ additional parameters to your url 😉
 
 - Cloudinary Account
 
-| Package 	 | PHP 	  | Laravel 	     | Flysystem 	 |
-|-----------|--------|---------------|-------------|
-| >v4.0     | >8.3   | > Laravel 11  | > 3.0       |
-| >v3.0     | >8.2   | > Laravel 10  | > 3.0       |
-| >v2.0 	   | >8.1 	 | > Laravel 9 	 | > 3.0 	     |
-| >v1.0 	   | >8.0 	 | > Laravel 8 	 | > 1.1 	     |
+| Package 	 | PHP 	       | Laravel 	 | Flysystem 	 |
+|-----------|-------------|-----------|-------------|
+| v12.0     | ^8.2 - ^8.4 | 12.x      | 3.25.1      |
+| v11.0     | ^8.2 - ^8.3 | 11.x      | 3.0         |
+| v4.0      | ^8.2 - ^8.3 | 11.x      | 3.0         |
+| v3.0      | 8.2         | 10.x      | 3.0         |
+| v2.0 	    | 8.1 	       | 9.x 	     | 3.0 	       |
+| v1.0 	    | 8.0 	       | 8.x 	     | 1.1 	       |
+
 
 ## ⚙️ Installation
 
@@ -126,11 +130,26 @@ https://res.cloudinary.com/my-cloud-name/image/upload/v1/client_cat/meow.jpg
 In the Media Library it is stored in `client_cat/meow` and you can retrieve
 the image with `meow`:
 
-```
+```php
 use Illuminate\Support\Facades\Storage;
 
-Storage::disk('cloudinary')->getUrl('meow');
+Storage::disk('cloudinary')->getAdapter()->getUrl('meow');
 ```
+
+You can use Cloudinary tranformation and options when retrieving the image:
+
+```php
+use Illuminate\Support\Facades\Storage;
+
+Storage::disk('cloudinary')->getAdapter()->getUrl([
+    'path' => 'meow',
+    'options => ['w_250', 'h_250', 'c_thumb',]
+);
+```
+
+You can find all options in
+the [official documentation](https://cloudinary.com/documentation/transformation_reference)
+
 
 This should increase the trust to store and retrieve your assets from the
 correct folder.
