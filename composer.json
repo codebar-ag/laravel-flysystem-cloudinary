@@ -13,12 +13,8 @@
     "authors": [
         {
             "name": "Sebastian Bürgin-Fix",
-            "email": "sebastian.buergin@buergin.ch",
+            "email": "helpdesk@codebar.ch",
             "homepage": "https://www.codebar.ch",
-            "role": "Sofware-Engineer"
-        },
-        {
-            "name": "Rhys Lees",
             "role": "Software-Engineer"
         }
     ],
