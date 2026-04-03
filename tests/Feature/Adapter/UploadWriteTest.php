@@ -57,20 +57,27 @@ it('can write stream', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $adapter->writeStream($publicId, $contents, new Config);
+    $resource = fopen('php://temp', 'r+');
+    fwrite($resource, $contents);
+    rewind($resource);
+    try {
+        $adapter->writeStream($publicId, $resource, new Config);
 
-    $meta = $adapter->lastUploadMetadata();
-    $this->assertSame($contents, $meta['contents']);
-    $this->assertSame('::etag::', $meta['etag']);
-    $this->assertSame('text/plain', $meta['mimetype']);
-    $this->assertSame($publicId, $meta['path']);
-    $this->assertSame(789, $meta['size']);
-    $this->assertSame(1633860610, $meta['timestamp']);
-    $this->assertSame('file', $meta['type']);
-    $this->assertSame(123456, $meta['version']);
-    $this->assertSame('::version-id::', $meta['versionid']);
-    $this->assertSame('public', $meta['visibility']);
-    Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
+        $meta = $adapter->lastUploadMetadata();
+        $this->assertSame($resource, $meta['contents']);
+        $this->assertSame('::etag::', $meta['etag']);
+        $this->assertSame('text/plain', $meta['mimetype']);
+        $this->assertSame($publicId, $meta['path']);
+        $this->assertSame(789, $meta['size']);
+        $this->assertSame(1633860610, $meta['timestamp']);
+        $this->assertSame('file', $meta['type']);
+        $this->assertSame(123456, $meta['version']);
+        $this->assertSame('::version-id::', $meta['versionid']);
+        $this->assertSame('public', $meta['visibility']);
+        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
+    } finally {
+        fclose($resource);
+    }
 });
 
 it('can update', function () {
@@ -120,19 +127,26 @@ it('can update stream', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $meta = $adapter->updateStream($publicId, $contents, new Config);
+    $resource = fopen('php://temp', 'r+');
+    fwrite($resource, $contents);
+    rewind($resource);
+    try {
+        $meta = $adapter->updateStream($publicId, $resource, new Config);
 
-    $this->assertSame($contents, $meta['contents']);
-    $this->assertSame('::etag::', $meta['etag']);
-    $this->assertSame('text/plain', $meta['mimetype']);
-    $this->assertSame($publicId, $meta['path']);
-    $this->assertSame(789, $meta['size']);
-    $this->assertSame(1633860610, $meta['timestamp']);
-    $this->assertSame('file', $meta['type']);
-    $this->assertSame(123456, $meta['version']);
-    $this->assertSame('::version-id::', $meta['versionid']);
-    $this->assertSame('public', $meta['visibility']);
-    Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
+        $this->assertSame($resource, $meta['contents']);
+        $this->assertSame('::etag::', $meta['etag']);
+        $this->assertSame('text/plain', $meta['mimetype']);
+        $this->assertSame($publicId, $meta['path']);
+        $this->assertSame(789, $meta['size']);
+        $this->assertSame(1633860610, $meta['timestamp']);
+        $this->assertSame('file', $meta['type']);
+        $this->assertSame(123456, $meta['version']);
+        $this->assertSame('::version-id::', $meta['versionid']);
+        $this->assertSame('public', $meta['visibility']);
+        Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
+    } finally {
+        fclose($resource);
+    }
 });
 
 it('update does not set lastUploadMetadata', function () {

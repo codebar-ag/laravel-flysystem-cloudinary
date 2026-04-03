@@ -40,7 +40,7 @@ final class CloudinaryResponseMapper
         return [
             'contents' => $body,
             'etag' => Arr::get($response, 'etag'),
-            'mimetype' => $this->mimeDetector->detectMimeType($logicalPath, $body) ?? 'text/plain',
+            'mimetype' => $this->mimeDetector->detectMimeType($logicalPath, is_string($body) ? $body : null) ?? 'text/plain',
             'path' => $logicalPath,
             'size' => Arr::get($response, 'bytes'),
             'timestamp' => strtotime((string) Arr::get($response, 'created_at')),

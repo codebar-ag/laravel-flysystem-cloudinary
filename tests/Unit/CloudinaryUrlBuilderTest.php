@@ -22,7 +22,6 @@ it('deliveryUrl returns false when image builder throws NotFound', function () {
         new CloudinaryPathNormalizer(null),
         new CloudinaryDiskOptions(null, null, [], true),
         new CloudinaryResourceOperations(new CloudinaryResponseLogger),
-        new CloudinaryResponseLogger
     );
 
     expect($builder->deliveryUrl('any'))->toBeFalse();
@@ -46,11 +45,10 @@ it('urlViaExplicit prefers secure url when disk option is true', function () {
         new CloudinaryPathNormalizer(null),
         new CloudinaryDiskOptions(null, null, [], true),
         new CloudinaryResourceOperations($logger),
-        $logger
     );
 
     expect($builder->urlViaExplicit('file'))->toBe('https://secure');
-    Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 2);
+    Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
 });
 
 it('urlViaExplicit returns plain url when preferSecureUrl is false', function () {
@@ -71,7 +69,6 @@ it('urlViaExplicit returns plain url when preferSecureUrl is false', function ()
         new CloudinaryPathNormalizer(null),
         new CloudinaryDiskOptions(null, null, [], false),
         new CloudinaryResourceOperations($logger),
-        $logger
     );
 
     expect($builder->urlViaExplicit('file'))->toBe('http://insecure');

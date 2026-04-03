@@ -19,6 +19,10 @@ final class CloudinaryPathNormalizer
 
         $folder = trim(trim($this->folder), '/');
 
+        if ($path === '') {
+            return $folder;
+        }
+
         return "{$folder}/{$path}";
     }
 

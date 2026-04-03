@@ -77,7 +77,6 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             $this->paths,
             $this->diskOptions,
             $this->resourceOps,
-            $this->logger
         );
         $this->listAssembler = new CloudinaryListResponseAssembler(
             $this->cloudinary,
@@ -572,9 +571,11 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             throw UnableToReadFile::fromLocation($errorPath, 'Could not create temporary stream.');
         }
         if (fwrite($tempFile, $contents) === false) {
+            fclose($tempFile);
             throw UnableToReadFile::fromLocation($errorPath);
         }
         if (rewind($tempFile) === false) {
+            fclose($tempFile);
             throw UnableToReadFile::fromLocation($errorPath);
         }
 

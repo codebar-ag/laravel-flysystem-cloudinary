@@ -20,6 +20,7 @@ it('prefixes logical path with folder', function () {
 
     expect($normalizer->prefixed('file.jpg'))->toBe('app_uploads/file.jpg');
     expect($normalizer->prefixed('/nested/path'))->toBe('app_uploads/nested/path');
+    expect($normalizer->prefixed(''))->toBe('app_uploads');
 });
 
 it('strips folder prefix for logical path', function () {
@@ -33,4 +34,5 @@ it('trims folder slashes when prefixing', function () {
     $normalizer = new CloudinaryPathNormalizer(' /my/folder/ ');
 
     expect($normalizer->prefixed('x'))->toBe('my/folder/x');
+    expect($normalizer->prefixed(''))->toBe('my/folder');
 });

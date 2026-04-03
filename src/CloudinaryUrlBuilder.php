@@ -12,7 +12,6 @@ final class CloudinaryUrlBuilder
         private readonly CloudinaryPathNormalizer $paths,
         private readonly CloudinaryDiskOptions $diskOptions,
         private readonly CloudinaryResourceOperations $resourceOps,
-        private readonly CloudinaryResponseLogger $logger,
     ) {}
 
     public function deliveryUrl(string|array $path): string|false
@@ -41,8 +40,6 @@ final class CloudinaryUrlBuilder
         } catch (NotFound) {
             return false;
         }
-
-        $this->logger->log($response);
 
         [
             'url' => $url,

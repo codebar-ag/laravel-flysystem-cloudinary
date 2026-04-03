@@ -21,7 +21,7 @@ it('can get url via request', function () {
     $url = $adapter->getUrlViaRequest('::path::');
 
     $this->assertSame('::secure-url::', $url);
-    Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 2);
+    Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
 });
 
 it('can get url', function () {
