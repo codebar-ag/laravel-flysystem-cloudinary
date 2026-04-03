@@ -20,7 +20,8 @@ additional parameters to your url 😉
 
 | Package 	 | PHP 	       | Laravel 	 | Flysystem 	 |
 |-----------|-------------|-----------|-------------|
-| v12.0     | ^8.2 - ^8.4 | 12.x      | 3.25.1      |
+| v13.0     | 8.3.*–8.5.* | 13.x      | 3.x         |
+| v12.0     | ^8.2 - ^8.4 | 12.x      | 3.x         |
 | v11.0     | ^8.2 - ^8.3 | 11.x      | 3.0         |
 | v4.0      | ^8.2 - ^8.3 | 11.x      | 3.0         |
 | v3.0      | 8.2         | 10.x      | 3.0         |
@@ -59,12 +60,32 @@ configuration:
 Add the following environment variables to your `.env` file:
 
 ```shell
-FILESYSTEM_DRIVER=cloudinary
+FILESYSTEM_DISK=cloudinary
 
 CLOUDINARY_CLOUD_NAME=my-cloud-name
 CLOUDINARY_API_KEY=my-api-key
 CLOUDINARY_API_SECRET=my-api-secret
 ```
+
+Older Laravel apps may still use `FILESYSTEM_DRIVER`; Laravel 9+ prefers `FILESYSTEM_DISK`.
+
+## Flysystem 3 and Laravel 13
+
+This package registers a **League Flysystem v3** adapter with Laravel’s `Storage` facade.
+
+- **Exceptions:** On failure, `read` / `readStream` throw `UnableToReadFile`; `copy` throws `UnableToCopyFile`; `delete` throws `UnableToDeleteFile`; `createDirectory` / `deleteDirectory` throw `UnableToCreateDirectory` / `UnableToDeleteDirectory` (see [CHANGELOG](CHANGELOG.md)).
+- **`deleteDirectory`:** Cloudinary’s Admin API only deletes **empty** folders. The adapter first destroys **shallow-listed files** under the logical path, then calls `delete_folder`—aligned with the legacy `deleteDir()` behaviour. Listing is shallow; deeply nested trees may need extra steps depending on how assets are organised.
+- **`listContents`:** **Shallow** listing only; the `$deep` argument is ignored. Each Admin API `assets` call uses `max_results` => 500 **without** `next_cursor` pagination, so very large prefixes may not return a complete list.
+- **`write` / `writeStream` vs `update` / `updateStream`:** Only `write` and `writeStream` set `lastUploadMetadata()` and the public `$meta` property. `update` and `updateStream` return the normalized metadata `array` from the upload (or `false` on failure) but **do not** update `lastUploadMetadata()`—it keeps the value from the last `write` / `writeStream`. Use the return value of `update` / `updateStream` when you need fresh metadata.
+- **Other helpers:** `lastCopySucceeded()` and `lastDeleteSucceeded()` (and legacy public `$copied` / `$deleted`) reflect the outcome of the latest `copy` / `delete` calls on this adapter instance.
+
+### Cloudinary folder modes
+
+This adapter lists assets with the Admin API using **public ID `prefix`** and manages folders with **`subFolders` / `create_folder` / `delete_folder`**, which matches **legacy fixed folder mode** and typical public-ID paths. If your Cloudinary product environment uses **dynamic folder mode** only, some behaviours may differ; see [Folder modes](https://cloudinary.com/documentation/folder_modes) and the [Admin API](https://cloudinary.com/documentation/admin_api#folders).
+
+### Continuous integration and integration tests
+
+The test suite includes optional **integration** tests that call the live Cloudinary API. They run only when `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` are set to real values (for example via GitHub Actions secrets). The default `composer test` command excludes the `integration` group; run `vendor/bin/pest` without `--exclude-group` to include them locally.
 
 ## 🏗 File extension problem
 
@@ -143,8 +164,8 @@ use Illuminate\Support\Facades\Storage;
 
 Storage::disk('cloudinary')->getAdapter()->getUrl([
     'path' => 'meow',
-    'options => ['w_250', 'h_250', 'c_thumb',]
-);
+    'options' => ['w_250', 'h_250', 'c_thumb'],
+]);
 ```
 
 You can find all options in
@@ -180,10 +201,10 @@ You can pass all parameters as an array to the `put`  method:
 use Illuminate\Support\Facades\Storage;
 
 Storage::disk('cloudinary')->put('meow', $contents, [
-    'options' [
+    'options' => [
         'notification_url' => 'https://mysite.example.com/notify_endpoint',
         'async' => true,
-    ]
+    ],
 ]);
 ```
 
@@ -260,13 +281,39 @@ return [
 ];
 ```
 
-## 🚧 Testing
+## 🚧 Testing and static analysis
 
-Run the tests:
+Default test run (Pest, **excludes** the `integration` group that calls the live Cloudinary API):
 
 ```shell
 composer test
 ```
+
+PHPStan with Larastan:
+
+```shell
+composer analyse
+```
+
+Pest with code coverage (also excludes `integration`):
+
+```shell
+composer test-coverage
+```
+
+Apply the project code style (Laravel Pint):
+
+```shell
+composer format
+```
+
+To run **all** tests including integration tests, use real `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` in the environment, then:
+
+```shell
+vendor/bin/pest
+```
+
+The same credentials can be supplied as GitHub Actions secrets for CI (see [.github/workflows/run-tests.yml](.github/workflows/run-tests.yml)).
 
 ## 📝 Changelog
 
@@ -278,7 +325,7 @@ Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
 
 ## 🧑‍💻 Security Vulnerabilities
 
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+Please see [.github/SECURITY.md](.github/SECURITY.md) for how to report security vulnerabilities.
 
 ## 🙏 Credits
 

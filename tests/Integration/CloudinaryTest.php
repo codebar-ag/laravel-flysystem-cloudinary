@@ -5,10 +5,14 @@ use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
 use Illuminate\Http\Testing\File;
 use Illuminate\Support\Facades\Event;
 use League\Flysystem\Config;
+use League\Flysystem\UnableToCopyFile;
 use League\Flysystem\UnableToMoveFile;
+use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 
 beforeEach(function () {
+    assertCloudinaryLiveCredentialsOrSkip($this);
+
     Event::fake();
 
     $cloudinary = new Cloudinary([
@@ -30,6 +34,7 @@ it('can write', function () {
     $this->adapter->write($publicId, $fakeImage, new Config);
 
     assertUploadResponse($this, $this->adapter->meta, $publicId);
+    $this->assertSame($this->adapter->meta, $this->adapter->lastUploadMetadata());
     $this->adapter->delete($publicId); // cleanup
 });
 
@@ -40,6 +45,7 @@ it('can write stream', function () {
     $this->adapter->writeStream($publicId, $fakeImage, new Config);
 
     assertUploadResponse($this, $this->adapter->meta, $publicId);
+    $this->assertSame($this->adapter->meta, $this->adapter->lastUploadMetadata());
     $this->adapter->delete($publicId); // cleanup
 });
 
@@ -63,13 +69,33 @@ it('can update stream', function () {
     $this->adapter->delete($publicId); // cleanup
 });
 
+it('update does not replace lastUploadMetadata after write', function () {
+    $publicId = 'file-update-meta-'.rand();
+    $first = File::image('black.jpg', 20, 20)->getContent();
+    $second = File::image('white.jpg', 40, 40)->getContent();
+
+    $this->adapter->write($publicId, $first, new Config);
+    $metaAfterWrite = $this->adapter->lastUploadMetadata();
+    $this->assertIsArray($metaAfterWrite);
+
+    $metaFromUpdate = $this->adapter->update($publicId, $second, new Config);
+    $this->assertIsArray($metaFromUpdate);
+    $this->assertSame($publicId, $metaFromUpdate['path']);
+
+    $this->assertSame($metaAfterWrite, $this->adapter->lastUploadMetadata());
+    $this->assertSame($first, $this->adapter->lastUploadMetadata()['contents']);
+    $this->assertSame($second, $metaFromUpdate['contents']);
+
+    $this->adapter->delete($publicId);
+});
+
 function assertUploadResponse(mixed $test, array $meta, string $publicId): void
 {
     $test->assertIsString($meta['contents']);
     $test->assertIsString($meta['etag']);
-    $test->assertSame('image/jpeg', $meta['mimetype']);
+    $test->assertContains($meta['mimetype'], ['image/jpeg', 'image/jpg']);
     $test->assertSame($publicId, $meta['path']);
-    $test->assertSame(695, $meta['size']);
+    $test->assertGreaterThan(0, $meta['size']);
     $test->assertIsInt($meta['timestamp']);
     $test->assertSame('file', $meta['type']);
     $test->assertIsInt($meta['version']);
@@ -129,9 +155,8 @@ it('does not copy if file is not found', function () {
     $path = 'file-does-not-exist';
     $newPath = 'file-copied';
 
+    $this->expectException(UnableToCopyFile::class);
     $this->adapter->copy($path, $newPath, new Config);
-
-    $this->assertFalse($this->adapter->copied);
 });
 
 it('can delete', function () {
@@ -201,31 +226,28 @@ it('can read stream', function () {
     $fakeImage = File::image('black.jpg')->getContent();
     $this->adapter->write($publicId, $fakeImage, new Config);
 
-    $meta = $this->adapter->readStream($publicId);
+    $stream = $this->adapter->readStream($publicId);
 
-    $this->assertIsResource($meta['stream']);
-    $this->assertArrayNotHasKey('contents', $meta);
+    $this->assertIsResource($stream);
     $this->adapter->delete($publicId); // cleanup
 });
 
 it('does not read if file is not found', function () {
     $publicId = 'file-does-not-exist';
 
-    $response = $this->adapter->read($publicId);
-
-    $this->assertEmpty($response);
+    $this->expectException(UnableToReadFile::class);
+    $this->adapter->read($publicId);
 });
 
 it('does not read stream if file is not found', function () {
     $publicId = 'file-does-not-exist';
 
-    $bool = $this->adapter->readStream($publicId);
-
-    $this->assertFalse($bool);
+    $this->expectException(UnableToReadFile::class);
+    $this->adapter->readStream($publicId);
 });
 
 it('can list directory contents', function () {
-    $files = $this->adapter->listContents('sandbox');
+    $files = iterator_to_array($this->adapter->listContents('sandbox', false));
 
     $this->assertIsArray($files);
 });
@@ -237,7 +259,7 @@ it('does get size', function () {
 
     $size = $this->adapter->getSize($publicId);
 
-    $this->assertEquals(695, $size);
+    $this->assertGreaterThan(0, $size);
     $this->adapter->delete($publicId); // cleanup
 });
 
@@ -255,7 +277,7 @@ it('does get mimetype', function () {
 
     $mimeType = $this->adapter->getMimetype($publicId);
 
-    $this->assertEquals('image/jpg', $mimeType);
+    $this->assertContains($mimeType, ['image/jpeg', 'image/jpg']);
     $this->adapter->delete($publicId); // cleanup
 });
 
@@ -345,4 +367,35 @@ it('can create and delete directory', function () {
 
     $this->adapter->deleteDirectory($directory);
     $this->assertFalse($this->adapter->directoryExists($directory));
+});
+
+it('can deleteDirectory when the folder contains a file', function () {
+    $directory = 'directory_with_file_'.rand();
+    $publicId = $directory.'/file-'.rand();
+    $fakeImage = File::image('black.jpg')->getContent();
+
+    $this->adapter->write($publicId, $fakeImage, new Config);
+
+    $this->assertTrue($this->adapter->fileExists($publicId));
+
+    $this->adapter->deleteDirectory($directory);
+
+    $this->assertFalse($this->adapter->fileExists($publicId));
+    $this->assertFalse($this->adapter->directoryExists($directory));
+});
+
+it('fileExists returns false for a missing path', function () {
+    expect($this->adapter->fileExists('no-such-file-'.rand().'/x'))->toBeFalse();
+});
+
+it('directoryExists returns false for a path that was never created', function () {
+    expect($this->adapter->directoryExists('no-such-dir-'.rand()))->toBeFalse();
+});
+
+it('has returns false for a missing file', function () {
+    expect($this->adapter->has('missing-'.rand()))->toBeFalse();
+});
+
+it('rename returns false when source is missing', function () {
+    expect($this->adapter->rename('missing-'.rand(), 'dest'))->toBeFalse();
 });

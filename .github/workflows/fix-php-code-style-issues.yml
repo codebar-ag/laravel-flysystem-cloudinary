@@ -13,8 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6.0.2
 
-      - name: Fix PHP code style issues
-        uses: aglipanci/laravel-pint-action@2.6
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.37.0
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - name: Install composer dependencies
+        uses: ramsey/composer-install@4.0.0
+
+      - name: Run Laravel Pint
+        run: vendor/bin/pint
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v7.1.0
