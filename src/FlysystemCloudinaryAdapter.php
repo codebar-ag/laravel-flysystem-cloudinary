@@ -7,7 +7,6 @@ use Cloudinary\Api\Exception\ApiError;
 use Cloudinary\Api\Exception\BadRequest;
 use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Api\Exception\RateLimited;
-use Cloudinary\Asset\Media;
 use Cloudinary\Cloudinary;
 use Cloudinary\Configuration\Configuration;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
@@ -17,11 +16,18 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use League\Flysystem\Config;
+use League\Flysystem\DirectoryAttributes;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\UnableToCopyFile;
+use League\Flysystem\UnableToCreateDirectory;
+use League\Flysystem\UnableToDeleteDirectory;
+use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToMoveFile;
+use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToSetVisibility;
+use League\Flysystem\UnableToWriteFile;
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
 use Throwable;
 
@@ -54,6 +60,9 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     public function write(string $path, string $contents, Config $config): void
     {
         $this->meta = $this->upload($path, $contents, $config);
+        if ($this->meta === false) {
+            throw UnableToWriteFile::atLocation($path, 'Upload failed.');
+        }
     }
 
     /**
@@ -62,6 +71,9 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     public function writeStream(string $path, $resource, Config $config): void
     {
         $this->meta = $this->upload($path, $resource, $config);
+        if ($this->meta === false) {
+            throw UnableToWriteFile::atLocation($path, 'Upload failed.');
+        }
     }
 
     /**
@@ -89,10 +101,16 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     protected function upload(string $path, $body, Config $config): array|false
     {
+        $tempFile = null;
         if (is_string($body)) {
             $tempFile = tmpfile();
-
+            if ($tempFile === false) {
+                return false;
+            }
             if (fwrite($tempFile, $body) === false) {
+                return false;
+            }
+            if (rewind($tempFile) === false) {
                 return false;
             }
         }
@@ -172,24 +190,23 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function copy(string $path, string $newpath, Config $config): void
     {
-        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+        $sourceLogical = trim($path, '/');
+        $destLogical = trim($newpath, '/');
+        $prefixedSource = $this->ensureFolderIsPrefixed($sourceLogical);
+        $prefixedDest = $this->ensureFolderIsPrefixed($destLogical);
 
-        $newpath = $this->ensureFolderIsPrefixed(trim($newpath, '/'));
-
-        $metaRead = $this->readObject($path);
+        $metaRead = $this->readObject($prefixedSource);
 
         if ($metaRead === false) {
             $this->copied = false;
-
-            return;
+            throw UnableToCopyFile::fromLocationTo($sourceLogical, $destLogical);
         }
 
-        $metaUpload = $this->upload($newpath, $metaRead['contents'], $config);
+        $metaUpload = $this->upload($prefixedDest, $metaRead['contents'], $config);
 
         if ($metaUpload === false) {
             $this->copied = false;
-
-            return;
+            throw UnableToCopyFile::fromLocationTo($sourceLogical, $destLogical);
         }
 
         $this->copied = true;
@@ -202,9 +219,16 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function delete(string $path): void
     {
-        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+        $logical = trim($path, '/');
+        $prefixed = $this->ensureFolderIsPrefixed($logical);
 
-        $this->deleted = $this->destroy($path);
+        $this->deleted = $this->destroy($prefixed);
+        if (! $this->deleted) {
+            throw UnableToDeleteFile::atLocation(
+                $logical,
+                'Cloudinary destroy did not succeed for this resource type or path.'
+            );
+        }
     }
 
     protected function destroy(string $path): bool
@@ -213,42 +237,42 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             'invalidate' => true,
         ];
 
-        $options['resource_type'] = 'image';
-        $response = $this
-            ->cloudinary
-            ->uploadApi()
-            ->destroy($path, $options);
-        event(new FlysystemCloudinaryResponseLog($response));
+        try {
+            $options['resource_type'] = 'image';
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->destroy($path, $options);
+            event(new FlysystemCloudinaryResponseLog($response));
 
-        if ($response->getArrayCopy()['result'] === 'ok') {
-            return true;
+            if ($response->getArrayCopy()['result'] === 'ok') {
+                return true;
+            }
+
+            $options['resource_type'] = 'raw';
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->destroy($path, $options);
+
+            event(new FlysystemCloudinaryResponseLog($response));
+
+            if ($response->getArrayCopy()['result'] === 'ok') {
+                return true;
+            }
+
+            $options['resource_type'] = 'video';
+            $response = $this
+                ->cloudinary
+                ->uploadApi()
+                ->destroy($path, $options);
+
+            event(new FlysystemCloudinaryResponseLog($response));
+
+            return $response->getArrayCopy()['result'] === 'ok';
+        } catch (ApiError) {
+            return false;
         }
-
-        $options['resource_type'] = 'raw';
-        $response = $this
-            ->cloudinary
-            ->uploadApi()
-            ->destroy($path, $options);
-
-        event(new FlysystemCloudinaryResponseLog($response));
-
-        if ($response->getArrayCopy()['result'] === 'ok') {
-            return true;
-        }
-
-        $options['resource_type'] = 'video';
-        $response = $this
-            ->cloudinary
-            ->uploadApi()
-            ->destroy($path, $options);
-
-        event(new FlysystemCloudinaryResponseLog($response));
-
-        if ($response->getArrayCopy()['result'] === 'ok') {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -258,12 +282,14 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     {
         $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
 
-        $files = $this->listContents($dirname);
+        $files = $this->listContents($dirname, false);
 
-        foreach ($files as ['path' => $path]) {
-            $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
-
-            $this->destroy($path);
+        foreach ($files as $item) {
+            if (! $item->isFile()) {
+                continue;
+            }
+            $logical = $item->path();
+            $this->destroy($this->ensureFolderIsPrefixed($logical));
         }
 
         try {
@@ -285,33 +311,39 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function createDir($dirname, Config $config): array|false
     {
-        $dirname = $this->ensureFolderIsPrefixed(trim($dirname, '/'));
+        $logical = trim($dirname, '/');
+        $prefixed = $this->ensureFolderIsPrefixed($logical);
 
         try {
             $response = $this
                 ->cloudinary
                 ->adminApi()
-                ->createFolder($dirname);
-        } catch (RateLimited) {
+                ->createFolder($prefixed);
+        } catch (ApiError|RateLimited) {
             return false;
         }
 
         event(new FlysystemCloudinaryResponseLog($response));
 
         return [
-            'path' => $dirname,
+            'path' => $logical,
             'type' => 'dir',
         ];
     }
 
     public function move(string $source, string $destination, Config $config): void
     {
+        $sourceLogical = trim($source, '/');
+        $destLogical = trim($destination, '/');
+        $prefixedSource = $this->ensureFolderIsPrefixed($sourceLogical);
+        $prefixedDest = $this->ensureFolderIsPrefixed($destLogical);
+
         try {
             $this->cloudinary
                 ->uploadApi()
-                ->rename($source, $destination);
+                ->rename($prefixedSource, $prefixedDest);
         } catch (NotFound $exception) {
-            throw UnableToMoveFile::fromLocationTo($source, $destination, $exception);
+            throw UnableToMoveFile::fromLocationTo($sourceLogical, $destLogical, $exception);
         }
     }
 
@@ -338,45 +370,45 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
      */
     public function read(string $path): string
     {
-        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+        $logical = trim($path, '/');
+        $prefixed = $this->ensureFolderIsPrefixed($logical);
 
-        try {
-            $contents = file_get_contents(Media::fromParams($path));
-        } catch (Exception) {
-            $contents = '';
+        $meta = $this->readObject($prefixed);
+        if ($meta === false) {
+            throw UnableToReadFile::fromLocation($path);
         }
 
-        return (string) $contents;
+        return (string) $meta['contents'];
     }
 
     /**
      * {@inheritDoc}
      */
-    public function readStream($path): array|false /** @phpstan-ignore-line */
+    public function readStream(string $path)
     {
-        $path = $this->ensureFolderIsPrefixed(trim($path, '/'));
+        $logical = trim($path, '/');
+        $prefixed = $this->ensureFolderIsPrefixed($logical);
 
-        $meta = $this->readObject($path);
+        $meta = $this->readObject($prefixed);
 
         if ($meta === false) {
-            return false;
+            throw UnableToReadFile::fromLocation($path);
         }
 
         $tempFile = tmpfile();
+        if ($tempFile === false) {
+            throw UnableToReadFile::fromLocation($path, 'Could not create temporary stream.');
+        }
 
         if (fwrite($tempFile, $meta['contents']) === false) {
-            return false;
+            throw UnableToReadFile::fromLocation($path);
         }
 
         if (rewind($tempFile) === false) {
-            return false;
+            throw UnableToReadFile::fromLocation($path);
         }
 
-        unset($meta['contents']);
-
-        $meta['stream'] = $tempFile;
-
-        return $meta;
+        return $tempFile;
     }
 
     /**
@@ -405,10 +437,14 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     /**
      * {@inheritDoc}
+     *
+     * Shallow listing only ($deep is ignored). Cloudinary Admin API does not map cleanly to recursive Flysystem trees.
+     *
+     * @return iterable<FileAttributes|DirectoryAttributes>
      */
-    public function listContents($directory = '', $recursive = false): array
+    public function listContents(string $path, bool $deep): iterable
     {
-        $directory = $this->ensureFolderIsPrefixed(trim($directory, '/'));
+        $directory = $this->ensureFolderIsPrefixed(trim($path, '/'));
 
         $options = [
             'type' => 'upload',
@@ -448,40 +484,69 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         event(new FlysystemCloudinaryResponseLog($responseVideoFiles));
         event(new FlysystemCloudinaryResponseLog($responseDirectories));
 
-        $rawFiles = array_map(function (array $resource) {
-            return $this->normalizeResponse($resource, $resource['public_id']);
-        }, $responseRawFiles->getArrayCopy()['resources']);
+        $out = [];
 
-        $imageFiles = array_map(function (array $resource) {
-            return $this->normalizeResponse($resource, $resource['public_id']);
-        }, $responseImageFiles->getArrayCopy()['resources']);
+        foreach ($responseRawFiles->getArrayCopy()['resources'] ?? [] as $resource) {
+            $out[] = $this->toFileAttributes(
+                $this->normalizeResponse($resource, $resource['public_id'])
+            );
+        }
 
-        $videoFiles = array_map(function (array $resource) {
-            return $this->normalizeResponse($resource, $resource['public_id']);
-        }, $responseVideoFiles->getArrayCopy()['resources']);
+        foreach ($responseImageFiles->getArrayCopy()['resources'] ?? [] as $resource) {
+            $out[] = $this->toFileAttributes(
+                $this->normalizeResponse($resource, $resource['public_id'])
+            );
+        }
 
-        $folders = array_map(function (array $resource) {
-            $path = $this->ensurePrefixedFolderIsRemoved($resource['path']);
+        foreach ($responseVideoFiles->getArrayCopy()['resources'] ?? [] as $resource) {
+            $out[] = $this->toFileAttributes(
+                $this->normalizeResponse($resource, $resource['public_id'])
+            );
+        }
 
-            return [
-                'type' => 'dir',
-                'path' => $path,
-                'name' => $resource['name'],
-            ];
-        }, $responseDirectories->getArrayCopy()['folders']);
+        foreach ($responseDirectories->getArrayCopy()['folders'] ?? [] as $resource) {
+            $logicalPath = $this->ensurePrefixedFolderIsRemoved($resource['path']);
 
-        return [
-            ...$rawFiles,
-            ...$imageFiles,
-            ...$videoFiles,
-            ...$folders,
-        ];
+            $out[] = new DirectoryAttributes(
+                $logicalPath,
+                null,
+                null,
+                isset($resource['name']) ? ['name' => $resource['name']] : []
+            );
+        }
+
+        return $out;
+    }
+
+    private function toFileAttributes(array $normalized): FileAttributes
+    {
+        $timestamp = $normalized['timestamp'];
+        $lastModified = ($timestamp !== false && $timestamp !== null) ? (int) $timestamp : null;
+
+        $extra = array_filter([
+            'etag' => $normalized['etag'] ?? null,
+            'version' => $normalized['version'] ?? null,
+            'versionid' => $normalized['versionid'] ?? null,
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $size = $normalized['size'] ?? null;
+
+        return new FileAttributes(
+            $normalized['path'],
+            is_numeric($size) ? (int) $size : null,
+            $normalized['visibility'] ?? 'public',
+            $lastModified,
+            $normalized['mimetype'] ?? null,
+            $extra
+        );
     }
 
     private function getMetadata(string $path, string $type): FileAttributes
     {
+        $prefixed = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
         try {
-            $result = (array) $this->cloudinary->adminApi()->asset($path);
+            $result = (array) $this->cloudinary->adminApi()->asset($prefixed);
         } catch (Throwable $exception) {
             throw UnableToRetrieveMetadata::create($path, $type, '', $exception);
         }
@@ -498,8 +563,11 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     private function mapToFileAttributes($resource): FileAttributes
     {
+        $publicId = $resource['public_id'];
+        $logicalPath = $this->ensurePrefixedFolderIsRemoved($publicId);
+
         return new FileAttributes(
-            $resource['public_id'],
+            $logicalPath,
             (int) $resource['bytes'],
             'public',
             (int) strtotime($resource['created_at']),
@@ -659,7 +727,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             'mimetype' => (new FinfoMimeTypeDetector)->detectMimeType($path, $body) ?? 'text/plain',
             'path' => $path,
             'size' => Arr::get($response, 'bytes'),
-            'timestamp' => strtotime(Arr::get($response, 'created_at')),
+            'timestamp' => strtotime((string) Arr::get($response, 'created_at')),
             'type' => 'file',
             'version' => Arr::get($response, 'version'),
             'versionid' => Arr::get($response, 'version_id'),
@@ -673,7 +741,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
         try {
             $this->cloudinary->adminApi()->asset($path);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
 
@@ -682,36 +750,55 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     public function directoryExists(string $path): bool
     {
-        $folders = [];
-        $needle = substr($path, 0, strripos($path, '/'));
+        $path = trim($path, '/');
+        $prefixedPath = $this->ensureFolderIsPrefixed($path);
+        $pos = strrpos($prefixedPath, '/');
+        $needle = $pos === false ? '' : substr($prefixedPath, 0, $pos);
 
-        $response = null;
-        do {
-            $response = (array) $this->cloudinary->adminApi()->subFolders($needle, [
-                'max_results' => 4,
-                'next_cursor' => $response['next_cursor'] ?? null,
-            ]);
+        try {
+            $folders = [];
+            $response = null;
+            do {
+                $response = (array) $this->cloudinary->adminApi()->subFolders($needle, [
+                    'max_results' => 500,
+                    'next_cursor' => $response['next_cursor'] ?? null,
+                ]);
 
-            $folders = array_merge($folders, $response['folders']);
-        } while (array_key_exists('next_cursor', $response) && ! is_null($response['next_cursor']));
-        $folders_found = array_filter(
-            $folders,
-            function ($e) use ($path) {
-                return $e['path'] == $path;
+                $folders = array_merge($folders, $response['folders'] ?? []);
+            } while (! empty($response['next_cursor']));
+
+            foreach ($folders as $folder) {
+                if (($folder['path'] ?? '') === $prefixedPath) {
+                    return true;
+                }
             }
-        );
+        } catch (Exception) {
+            return false;
+        }
 
-        return count($folders_found) > 0;
+        return false;
     }
 
     public function deleteDirectory(string $path): void
     {
-        $this->cloudinary->adminApi()->deleteFolder($path);
+        $prefixed = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
+        try {
+            $this->cloudinary->adminApi()->deleteFolder($prefixed);
+        } catch (Throwable $e) {
+            throw UnableToDeleteDirectory::atLocation($path, $e->getMessage(), $e);
+        }
     }
 
     public function createDirectory(string $path, Config $config): void
     {
-        $this->cloudinary->adminApi()->createFolder($path);
+        $prefixed = $this->ensureFolderIsPrefixed(trim($path, '/'));
+
+        try {
+            $this->cloudinary->adminApi()->createFolder($prefixed);
+        } catch (Throwable $e) {
+            throw UnableToCreateDirectory::atLocation($path, $e->getMessage(), $e);
+        }
     }
 
     public function setVisibility(string $path, string $visibility): void

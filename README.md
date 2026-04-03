@@ -20,7 +20,8 @@ additional parameters to your url 😉
 
 | Package 	 | PHP 	       | Laravel 	 | Flysystem 	 |
 |-----------|-------------|-----------|-------------|
-| v12.0     | ^8.2 - ^8.4 | 12.x      | 3.25.1      |
+| v13.0     | 8.3.*–8.5.* | 13.x      | 3.x         |
+| v12.0     | ^8.2 - ^8.4 | 12.x      | 3.x         |
 | v11.0     | ^8.2 - ^8.3 | 11.x      | 3.0         |
 | v4.0      | ^8.2 - ^8.3 | 11.x      | 3.0         |
 | v3.0      | 8.2         | 10.x      | 3.0         |
@@ -59,12 +60,22 @@ configuration:
 Add the following environment variables to your `.env` file:
 
 ```shell
-FILESYSTEM_DRIVER=cloudinary
+FILESYSTEM_DISK=cloudinary
 
 CLOUDINARY_CLOUD_NAME=my-cloud-name
 CLOUDINARY_API_KEY=my-api-key
 CLOUDINARY_API_SECRET=my-api-secret
 ```
+
+Older Laravel apps may still use `FILESYSTEM_DRIVER`; Laravel 9+ prefers `FILESYSTEM_DISK`.
+
+### Cloudinary folder modes
+
+This adapter lists assets with the Admin API using **public ID `prefix`** and manages folders with **`subFolders` / `create_folder` / `delete_folder`**, which matches **legacy fixed folder mode** and typical public-ID paths. If your Cloudinary product environment uses **dynamic folder mode** only, some behaviours may differ; see [Folder modes](https://cloudinary.com/documentation/folder_modes) and the [Admin API](https://cloudinary.com/documentation/admin_api#folders).
+
+### Continuous integration and integration tests
+
+The test suite includes optional **integration** tests that call the live Cloudinary API. They run only when `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` are set to real values (for example via GitHub Actions secrets). The default `composer test` command excludes the `integration` group; run `vendor/bin/pest` without `--exclude-group` to include them locally.
 
 ## 🏗 File extension problem
 

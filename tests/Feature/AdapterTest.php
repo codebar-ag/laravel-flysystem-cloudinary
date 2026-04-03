@@ -1,12 +1,14 @@
 <?php
 
 use Cloudinary\Api\ApiResponse;
+use Cloudinary\Api\Exception\NotFound;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use League\Flysystem\Config;
+use League\Flysystem\UnableToCopyFile;
 use Mockery\MockInterface;
 
 beforeEach(function () {
@@ -166,7 +168,15 @@ it('can copy', function () {
         $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
             'secure_url' => '::url::',
         ], []));
-        $mock->shouldReceive('uploadApi->upload')->once()->andReturn(new ApiResponse([], []));
+        $mock->shouldReceive('uploadApi->upload')->once()->andReturn(new ApiResponse([
+            'public_id' => '::to-path::',
+            'version' => 1,
+            'version_id' => 'v1',
+            'created_at' => '2021-10-10T10:10:10Z',
+            'bytes' => 3,
+            'etag' => 'e',
+            'access_mode' => 'public',
+        ], []));
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
@@ -236,18 +246,17 @@ it('can check if file exists', function () {
 });
 
 it('can read stream', function () {
-    Http::fake();
+    Http::fake(['*' => Http::response('body')]);
     $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
         $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
-            'secure_url' => '::url::',
+            'secure_url' => 'https://example.test/file',
         ], []));
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $meta = $adapter->readStream('::path::');
+    $stream = $adapter->readStream('::path::');
 
-    $this->assertIsResource($meta['stream']);
-    $this->assertArrayNotHasKey('contents', $meta);
+    $this->assertIsResource($stream);
     Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 1);
 });
 
@@ -263,10 +272,21 @@ it('can list directory contents', function () {
     });
     $adapter = new FlysystemCloudinaryAdapter($mock);
 
-    $files = $adapter->listContents('::path::');
+    $files = iterator_to_array($adapter->listContents('::path::', false));
 
     $this->assertSame([], $files);
     Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 4);
+});
+
+it('does not copy if file is not found', function () {
+    Http::fake();
+    $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
+        $mock->shouldReceive('uploadApi->explicit')->times(3)->andThrow(new NotFound('not found'));
+    });
+    $adapter = new FlysystemCloudinaryAdapter($mock);
+
+    $this->expectException(UnableToCopyFile::class);
+    $adapter->copy('::missing::', '::to-path::', new Config);
 });
 
 it('can get url via request', function () {

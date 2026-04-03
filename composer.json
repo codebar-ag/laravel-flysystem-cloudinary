@@ -1,6 +1,6 @@
 {
     "name": "codebar-ag/laravel-flysystem-cloudinary",
-    "description": "Cloudinary Flysystem v1 integration with Laravel",
+    "description": "Cloudinary Flysystem 3 integration with Laravel",
     "keywords": [
         "laravel",
         "codebar-ag",
@@ -19,18 +19,18 @@
         }
     ],
     "require": {
-        "php": "8.2.*|8.3.*|8.4.*",
+        "php": "8.3.*|8.4.*|8.5.*",
         "guzzlehttp/guzzle": "^7.8",
-        "illuminate/contracts": "^12.0",
+        "illuminate/contracts": "^13.0",
         "cloudinary/cloudinary_php": "^2.13",
         "nesbot/carbon": "^3.8",
         "spatie/laravel-package-tools": "^1.19"
     },
     "require-dev": {
         "laravel/pint": "^1.21",
-        "larastan/larastan": "^v3.1",
-        "orchestra/testbench": "^10.0",
-        "pestphp/pest": "^3.7",
+        "larastan/larastan": "^3.9",
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^4.0",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
@@ -47,25 +47,30 @@
         }
     },
     "scripts": {
-        "psalm": "vendor/bin/psalm",
-        "test": "./vendor/bin/testbench package:test --parallel --no-coverage --exclude-group=Integration",
-        "test-coverage": "vendor/bin/phpunit --coverage-html coverage --exclude-group=Integration",
-        "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes"
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest --no-coverage --exclude-group=integration",
+        "test-coverage": "vendor/bin/pest --coverage --exclude-group=integration",
+        "format": "vendor/bin/pint"
     },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
+            "composer/package-versions-deprecated": false,
             "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
     "extra": {
+        "branch-alias": {
+            "dev-main": "13.x-dev"
+        },
         "laravel": {
             "providers": [
                 "CodebarAg\\FlysystemCloudinary\\FlysystemCloudinaryServiceProvider"
             ]
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
