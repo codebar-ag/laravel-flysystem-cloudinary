@@ -69,6 +69,26 @@ it('can update stream', function () {
     $this->adapter->delete($publicId); // cleanup
 });
 
+it('update does not replace lastUploadMetadata after write', function () {
+    $publicId = 'file-update-meta-'.rand();
+    $first = File::image('black.jpg', 20, 20)->getContent();
+    $second = File::image('white.jpg', 40, 40)->getContent();
+
+    $this->adapter->write($publicId, $first, new Config);
+    $metaAfterWrite = $this->adapter->lastUploadMetadata();
+    $this->assertIsArray($metaAfterWrite);
+
+    $metaFromUpdate = $this->adapter->update($publicId, $second, new Config);
+    $this->assertIsArray($metaFromUpdate);
+    $this->assertSame($publicId, $metaFromUpdate['path']);
+
+    $this->assertSame($metaAfterWrite, $this->adapter->lastUploadMetadata());
+    $this->assertSame($first, $this->adapter->lastUploadMetadata()['contents']);
+    $this->assertSame($second, $metaFromUpdate['contents']);
+
+    $this->adapter->delete($publicId);
+});
+
 function assertUploadResponse(mixed $test, array $meta, string $publicId): void
 {
     $test->assertIsString($meta['contents']);
@@ -346,6 +366,21 @@ it('can create and delete directory', function () {
     $this->assertTrue($this->adapter->directoryExists($directory));
 
     $this->adapter->deleteDirectory($directory);
+    $this->assertFalse($this->adapter->directoryExists($directory));
+});
+
+it('can deleteDirectory when the folder contains a file', function () {
+    $directory = 'directory_with_file_'.rand();
+    $publicId = $directory.'/file-'.rand();
+    $fakeImage = File::image('black.jpg')->getContent();
+
+    $this->adapter->write($publicId, $fakeImage, new Config);
+
+    $this->assertTrue($this->adapter->fileExists($publicId));
+
+    $this->adapter->deleteDirectory($directory);
+
+    $this->assertFalse($this->adapter->fileExists($publicId));
     $this->assertFalse($this->adapter->directoryExists($directory));
 });
 

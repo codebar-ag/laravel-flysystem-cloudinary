@@ -33,10 +33,11 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     /**
      * Populated after {@see write()} / {@see writeStream()}. Prefer {@see lastUploadMetadata()} for new code.
+     * False before any upload on this adapter instance.
      *
      * @var array<string, mixed>|false
      */
-    public array|false $meta;
+    public array|false $meta = false;
 
     /** Set after {@see copy()}. Prefer {@see lastCopySucceeded()} for new code. */
     public bool $copied = false;
@@ -85,6 +86,8 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             $this->logger
         );
 
+        // cloudinary/cloudinary_php: read initialization without touching an uninitialized typed property.
+        // Coupled to Cloudinary::$configuration (public in 3.x); a major SDK change should fail tests on upgrade.
         $configurationProperty = new ReflectionProperty(Cloudinary::class, 'configuration');
         if ($configurationProperty->isInitialized($cloudinary)) {
             Configuration::instance($cloudinary->configuration);
@@ -269,6 +272,19 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
     }
 
     /**
+     * Shallow listing: destroys each listed file so Admin API can delete a non-empty folder.
+     */
+    private function destroyListedFilesInDirectory(string $logicalDir): void
+    {
+        foreach ($this->listContents($logicalDir, false) as $item) {
+            if (! $item->isFile()) {
+                continue;
+            }
+            $this->resourceOps->destroy($this->cloudinary, $this->paths->prefixed($item->path()));
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function deleteDir($dirname): bool
@@ -276,12 +292,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         $logicalDir = trim($dirname, '/');
         $prefixedDir = $this->paths->prefixed($logicalDir);
 
-        foreach ($this->listContents($logicalDir, false) as $item) {
-            if (! $item->isFile()) {
-                continue;
-            }
-            $this->resourceOps->destroy($this->cloudinary, $this->paths->prefixed($item->path()));
-        }
+        $this->destroyListedFilesInDirectory($logicalDir);
 
         try {
             $response = $this->cloudinary->adminApi()->deleteFolder($prefixedDir);
@@ -324,7 +335,7 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
         $prefixedDest = $this->paths->prefixed($destLogical);
 
         try {
-            $this->cloudinary->uploadApi()->rename($prefixedSource, $prefixedDest);
+            $this->cloudinary->uploadApi()->rename($prefixedSource, $prefixedDest, ['invalidate' => true]);
         } catch (NotFound $exception) {
             throw UnableToMoveFile::fromLocationTo($sourceLogical, $destLogical, $exception);
         }
@@ -463,13 +474,18 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
 
     public function deleteDirectory(string $path): void
     {
-        $prefixed = $this->paths->prefixed(trim($path, '/'));
+        $logicalDir = trim($path, '/');
+        $prefixedDir = $this->paths->prefixed($logicalDir);
+
+        $this->destroyListedFilesInDirectory($logicalDir);
 
         try {
-            $this->cloudinary->adminApi()->deleteFolder($prefixed);
+            $response = $this->cloudinary->adminApi()->deleteFolder($prefixedDir);
         } catch (Throwable $e) {
             throw UnableToDeleteDirectory::atLocation($path, $e->getMessage(), $e);
         }
+
+        $this->logger->log($response);
     }
 
     public function createDirectory(string $path, Config $config): void

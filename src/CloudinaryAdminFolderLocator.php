@@ -14,15 +14,16 @@ final class CloudinaryAdminFolderLocator
 
         try {
             $folders = [];
-            $response = null;
+            $nextCursor = null;
             do {
                 $response = (array) $cloudinary->adminApi()->subFolders($needle, [
                     'max_results' => 500,
-                    'next_cursor' => $response['next_cursor'] ?? null,
+                    'next_cursor' => $nextCursor,
                 ]);
 
                 $folders = array_merge($folders, $response['folders'] ?? []);
-            } while (! empty($response['next_cursor']));
+                $nextCursor = $response['next_cursor'] ?? null;
+            } while (! empty($nextCursor));
 
             foreach ($folders as $folder) {
                 if (($folder['path'] ?? '') === $prefixedPath) {

@@ -1,11 +1,13 @@
 <?php
 
 use Cloudinary\Api\ApiResponse;
+use Cloudinary\Api\Exception\ApiError;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
 use Illuminate\Support\Facades\Event;
 use League\Flysystem\Config;
+use League\Flysystem\UnableToDeleteDirectory;
 use Mockery\MockInterface;
 
 it('can delete', function () {
@@ -38,6 +40,41 @@ it('can delete a directory', function () {
 
     $this->assertTrue($bool);
     Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 5);
+});
+
+it('can deleteDirectory after clearing shallow-listed files', function () {
+    $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
+        $mock->shouldReceive('adminApi->assets')->times(3)->andReturn(new ApiResponse([
+            'resources' => [],
+        ], []));
+        $mock->shouldReceive('adminApi->subFolders')->once()->andReturn(new ApiResponse([
+            'folders' => [],
+        ], []));
+        $mock->shouldReceive('adminApi->deleteFolder')->once()->andReturn(new ApiResponse([], []));
+    });
+    $adapter = new FlysystemCloudinaryAdapter($mock);
+
+    $adapter->deleteDirectory('::path::');
+
+    Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 5);
+});
+
+it('deleteDirectory throws when deleteFolder fails', function () {
+    $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
+        $mock->shouldReceive('adminApi->assets')->times(3)->andReturn(new ApiResponse([
+            'resources' => [],
+        ], []));
+        $mock->shouldReceive('adminApi->subFolders')->once()->andReturn(new ApiResponse([
+            'folders' => [],
+        ], []));
+        $mock->shouldReceive('adminApi->deleteFolder')->once()->andThrow(
+            new ApiError('folder not empty')
+        );
+    });
+    $adapter = new FlysystemCloudinaryAdapter($mock);
+
+    $this->expectException(UnableToDeleteDirectory::class);
+    $adapter->deleteDirectory('::path::');
 });
 
 it('deleteDir lists a single-prefixed path when folder config is set', function () {
