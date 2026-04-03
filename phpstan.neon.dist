@@ -10,8 +10,3 @@ parameters:
     checkOctaneCompatibility: true
     checkModelProperties: true
     noEnvCallsOutsideOfConfig: false
-    ignoreErrors:
-        -
-            identifier: argument.type
-            message: '#Parameter \#1 \$file of method Cloudinary\\Api\\Upload\\UploadApi::upload\(\) expects string#'
-            path: src/FlysystemCloudinaryAdapter.php

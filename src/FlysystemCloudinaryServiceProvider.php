@@ -22,7 +22,8 @@ class FlysystemCloudinaryServiceProvider extends PackageServiceProvider
     public function bootingPackage(): void
     {
         Storage::extend('cloudinary', function (Application $app, array $config) {
-            $adapter = new FlysystemCloudinaryAdapter(new Cloudinary($config));
+            $diskOptions = CloudinaryDiskOptions::fromDiskAndConfig($config);
+            $adapter = new FlysystemCloudinaryAdapter(new Cloudinary($config), $diskOptions);
 
             return new FilesystemAdapter(new Filesystem($adapter, $config), $adapter, $config);
         });

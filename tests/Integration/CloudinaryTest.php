@@ -11,9 +11,7 @@ use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 
 beforeEach(function () {
-    if (in_array(env('CLOUDINARY_CLOUD_NAME'), [null, '', 'cloudinary_cloud_name'], true)) {
-        $this->markTestSkipped('Set real CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to run integration tests.');
-    }
+    assertCloudinaryLiveCredentialsOrSkip($this);
 
     Event::fake();
 
@@ -36,6 +34,7 @@ it('can write', function () {
     $this->adapter->write($publicId, $fakeImage, new Config);
 
     assertUploadResponse($this, $this->adapter->meta, $publicId);
+    $this->assertSame($this->adapter->meta, $this->adapter->lastUploadMetadata());
     $this->adapter->delete($publicId); // cleanup
 });
 
@@ -46,6 +45,7 @@ it('can write stream', function () {
     $this->adapter->writeStream($publicId, $fakeImage, new Config);
 
     assertUploadResponse($this, $this->adapter->meta, $publicId);
+    $this->assertSame($this->adapter->meta, $this->adapter->lastUploadMetadata());
     $this->adapter->delete($publicId); // cleanup
 });
 
@@ -347,4 +347,20 @@ it('can create and delete directory', function () {
 
     $this->adapter->deleteDirectory($directory);
     $this->assertFalse($this->adapter->directoryExists($directory));
+});
+
+it('fileExists returns false for a missing path', function () {
+    expect($this->adapter->fileExists('no-such-file-'.rand().'/x'))->toBeFalse();
+});
+
+it('directoryExists returns false for a path that was never created', function () {
+    expect($this->adapter->directoryExists('no-such-dir-'.rand()))->toBeFalse();
+});
+
+it('has returns false for a missing file', function () {
+    expect($this->adapter->has('missing-'.rand()))->toBeFalse();
+});
+
+it('rename returns false when source is missing', function () {
+    expect($this->adapter->rename('missing-'.rand(), 'dest'))->toBeFalse();
 });

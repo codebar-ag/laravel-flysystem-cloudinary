@@ -22,7 +22,7 @@
         "php": "8.3.*|8.4.*|8.5.*",
         "guzzlehttp/guzzle": "^7.8",
         "illuminate/contracts": "^13.0",
-        "cloudinary/cloudinary_php": "^2.13",
+        "cloudinary/cloudinary_php": "^3.1",
         "nesbot/carbon": "^3.8",
         "spatie/laravel-package-tools": "^1.19"
     },

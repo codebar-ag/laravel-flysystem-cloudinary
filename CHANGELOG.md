@@ -15,6 +15,11 @@ All notable changes to `laravel-cloudinary` will be documented in this file.
 - `createDir()` catches `ApiError` as well as `RateLimited`
 - Composer scripts: `analyse` (PHPStan), `test` / `test-coverage` via Pest with `--exclude-group=integration`; `format` uses Pint
 - Integration tests: `integration` group, skip when placeholder Cloudinary env is used
+- **Adapter internals:** Extracted `CloudinaryPathNormalizer`, `CloudinaryDiskOptions`, `CloudinaryResponseMapper`, `CloudinaryResourceOperations`, and `CloudinaryResponseLogger`; disk options (folder, upload preset, merge options, secure URL preference) are resolved from the Laravel disk config in `FlysystemCloudinaryServiceProvider` with fallback to `config('flysystem-cloudinary.*')` when the adapter is constructed without disk options
+- **API:** Added `lastUploadMetadata()`, `lastCopySucceeded()`, and `lastDeleteSucceeded()`; public `$meta`, `$copied`, and `$deleted` remain for backward compatibility
+- **Adapter slimming:** `CloudinaryStringUploadSource`, `CloudinaryAdminFolderLocator`, `CloudinaryUrlBuilder`, `CloudinaryListResponseAssembler`, `CloudinaryDiskOptions::uploadOptionsFor()`, and `Concerns\InteractsWithCloudinaryMetadata` further shrink `FlysystemCloudinaryAdapter` and move branching out of the adapter file
+- **Security:** `phpunit.xml` no longer ships real Cloudinary API secrets; default env is placeholder-only. Live API integration tests run only when real `CLOUDINARY_*` values are exported (see `tests/cloudinary_integration.php`)
+- **Tests:** Dedicated Pest files per collaborator (`CloudinaryResourceOperations`, `CloudinaryResponseMapper`, `CloudinaryResponseLogger`, `CloudinaryUrlBuilder`, `CloudinaryListResponseAssembler`, `CloudinaryAdminFolderLocator`, `CloudinaryDiskOptions`, `FlysystemCloudinaryResponseLog`, `FlysystemCloudinaryServiceProvider`); extra integration cases for missing files, directories, and rename
 
 ## 2.0.0 - 2022-11-20
 
