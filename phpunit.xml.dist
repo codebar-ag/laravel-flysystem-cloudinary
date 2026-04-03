@@ -21,7 +21,7 @@
     </logging>
     <php>
         <env name="APP_KEY" value="base64:F+mHMDBbavrsp/I3WYA5lDSwDJJI/0wQG4eM3csq/lo="/>
-        <env name="FILESYSTEM_DRIVER" value="cloudinary"/>
+        <env name="FILESYSTEM_DISK" value="cloudinary"/>
         <env name="CLOUDINARY_CLOUD_NAME" value="cloudinary_cloud_name"/>
         <env name="CLOUDINARY_API_KEY" value="cloudinary_api_key"/>
         <env name="CLOUDINARY_API_SECRET" value="cloudinary_api_secret"/>
