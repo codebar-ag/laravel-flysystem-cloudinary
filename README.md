@@ -18,16 +18,15 @@ additional parameters to your url 😉
 
 - Cloudinary Account
 
-| Package 	 | PHP 	       | Laravel 	 | Flysystem 	 |
-|-----------|-------------|-----------|-------------|
-| v13.0     | 8.3.*–8.5.* | 13.x      | 3.x         |
-| v12.0     | ^8.2 - ^8.4 | 12.x      | 3.x         |
-| v11.0     | ^8.2 - ^8.3 | 11.x      | 3.0         |
-| v4.0      | ^8.2 - ^8.3 | 11.x      | 3.0         |
-| v3.0      | 8.2         | 10.x      | 3.0         |
-| v2.0 	    | 8.1 	       | 9.x 	     | 3.0 	       |
-| v1.0 	    | 8.0 	       | 8.x 	     | 1.1 	       |
-
+| Package | PHP | Laravel | Flysystem |
+| --- | --- | --- | --- |
+| v13.0 | 8.3.* \| 8.4.* \| 8.5.* | 13.x | 3.x |
+| v12.0 | 8.2.* \| 8.3.* \| 8.4.* | 12.x | 3.x |
+| v11.0 | 8.2.* \| 8.3.* | 11.x | 3.x |
+| v4.0 | 8.2.* \| 8.3.* | 11.x | 3.x |
+| v3.0 | 8.2.* | 10.x | 3.x |
+| v2.0 | 8.1.* | 9.x | 3.x |
+| v1.0 | 8.0.* | 8.x | 1.1 |
 
 ## ⚙️ Installation
 
@@ -328,9 +327,7 @@ Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
 Please see [.github/SECURITY.md](.github/SECURITY.md) for how to report security vulnerabilities.
 
 ## 🙏 Credits
-
-- [Ruslan Steiger](https://github.com/SuddenlyRust)
-- [Sebastian Fix](https://github.com/StanBarrows)
+- [Sebastian Bürgin-Fix](https://github.com/StanBarrows)
 - [All Contributors](../../contributors)
 - [Skeleton Repository from Spatie](https://github.com/spatie/package-skeleton-laravel)
 - [Laravel Package Training from Spatie](https://spatie.be/videos/laravel-package-training)
