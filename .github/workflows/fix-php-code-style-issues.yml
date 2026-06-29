@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@2.37.0
+        uses: shivammathur/setup-php@2.37.2
         with:
           php-version: '8.5'
           coverage: none
@@ -26,6 +26,6 @@ jobs:
         run: vendor/bin/pint
 
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v7.1.0
+        uses: stefanzweifel/git-auto-commit-action@v7.2.0
         with:
           commit_message: Fix styling
