@@ -76,3 +76,61 @@ it('maps resources and folders to attributes', function () {
 
     Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 4);
 });
+
+it('scopes the asset prefix to the directory so sibling public ids are not listed', function () {
+    Event::fake();
+
+    $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
+        $mock->shouldReceive('adminApi->assets')
+            ->times(3)
+            ->withArgs(function (array $options) {
+                expect($options['prefix'])->toBe('tenant/photos/');
+
+                return true;
+            })
+            ->andReturn(new ApiResponse(['resources' => []], []));
+        $mock->shouldReceive('adminApi->subFolders')
+            ->once()
+            ->with('tenant/photos')
+            ->andReturn(new ApiResponse(['folders' => []], []));
+    });
+
+    $paths = new CloudinaryPathNormalizer('tenant');
+    $assembler = new CloudinaryListResponseAssembler(
+        $mock,
+        $paths,
+        new CloudinaryResponseMapper($paths),
+        new CloudinaryResponseLogger
+    );
+
+    expect($assembler->shallowList('tenant/photos'))->toBe([]);
+});
+
+it('keeps an empty asset prefix when listing the root', function () {
+    Event::fake();
+
+    $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
+        $mock->shouldReceive('adminApi->assets')
+            ->times(3)
+            ->withArgs(function (array $options) {
+                expect($options['prefix'])->toBe('');
+
+                return true;
+            })
+            ->andReturn(new ApiResponse(['resources' => []], []));
+        $mock->shouldReceive('adminApi->subFolders')
+            ->once()
+            ->with('')
+            ->andReturn(new ApiResponse(['folders' => []], []));
+    });
+
+    $paths = new CloudinaryPathNormalizer(null);
+    $assembler = new CloudinaryListResponseAssembler(
+        $mock,
+        $paths,
+        new CloudinaryResponseMapper($paths),
+        new CloudinaryResponseLogger
+    );
+
+    expect($assembler->shallowList(''))->toBe([]);
+});
