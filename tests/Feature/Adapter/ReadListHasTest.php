@@ -4,8 +4,10 @@ use Cloudinary\Api\ApiResponse;
 use Cloudinary\Cloudinary;
 use CodebarAg\FlysystemCloudinary\Events\FlysystemCloudinaryResponseLog;
 use CodebarAg\FlysystemCloudinary\FlysystemCloudinaryAdapter;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
+use League\Flysystem\UnableToReadFile;
 use Mockery\MockInterface;
 
 it('can check if file exists', function () {
@@ -51,4 +53,27 @@ it('can list directory contents', function () {
 
     $this->assertSame([], $files);
     Event::assertDispatched(FlysystemCloudinaryResponseLog::class, 4);
+});
+
+it('throws UnableToReadFile when the explicit response has no secure url', function () {
+    Http::fake();
+    $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
+        $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([], []));
+    });
+    $adapter = new FlysystemCloudinaryAdapter($mock);
+
+    expect(fn () => $adapter->read('::path::'))->toThrow(UnableToReadFile::class);
+    Http::assertNothingSent();
+});
+
+it('throws UnableToReadFile when downloading the asset fails to connect', function () {
+    Http::fake(['*' => fn () => throw new ConnectionException('timeout')]);
+    $mock = $this->mock(Cloudinary::class, function (MockInterface $mock) {
+        $mock->shouldReceive('uploadApi->explicit')->once()->andReturn(new ApiResponse([
+            'secure_url' => 'https://example.test/file',
+        ], []));
+    });
+    $adapter = new FlysystemCloudinaryAdapter($mock);
+
+    expect(fn () => $adapter->read('::path::'))->toThrow(UnableToReadFile::class);
 });
