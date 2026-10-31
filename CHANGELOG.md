@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `laravel-cloudinary` will be documented in this file.
+All notable changes to `laravel-flysystem-cloudinary` will be documented in this file.
 
 ## 13.0.0 - 2026-04-03
 
