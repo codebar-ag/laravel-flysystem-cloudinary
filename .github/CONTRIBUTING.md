@@ -48,6 +48,14 @@ If the project maintainer has any additional requirements, you will find them li
 
 - **Consider our release cycle** - We try to follow [SemVer v2.0.0](https://semver.org/). Randomly breaking public APIs is not an option.
 
+- **Release tags and merge messages** - When a pull request is merged into `main`, the [Release](workflows/release.yml) workflow runs [github-tag-action](https://github.com/anothrNick/github-tag-action) and pushes a new version tag. Put the bump you want in the **merge commit message** (title and/or description—use the squash message field if you squash-merge):
+
+  - **`#major`** — next tag is a semver major bump (breaking releases).
+  - **`#minor`** — minor bump.
+  - **`#patch`** — patch bump.
+
+  If none of these appear in the merged commits, the workflow uses **`DEFAULT_BUMP`** (currently **minor**). Example for a breaking release: `Release Laravel 13 support #major`.
+
 - **One pull request per feature** - If you want to do more than one thing, send multiple pull requests.
 
 - **Send coherent history** - Make sure each individual commit in your pull request is meaningful. If you had to make multiple intermediate commits while developing, please [squash them](https://www.git-scm.com/book/en/v2/Git-Tools-Rewriting-History#Changing-Multiple-Commit-Messages) before submitting.
