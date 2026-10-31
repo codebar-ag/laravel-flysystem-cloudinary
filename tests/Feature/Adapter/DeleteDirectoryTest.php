@@ -84,7 +84,7 @@ it('deleteDir lists a single-prefixed path when folder config is set', function 
         $mock->shouldReceive('adminApi->assets')
             ->times(3)
             ->withArgs(function (array $options) {
-                expect($options['prefix'] ?? null)->toBe('app_uploads/::path::');
+                expect($options['prefix'] ?? null)->toBe('app_uploads/::path::/');
 
                 return true;
             })

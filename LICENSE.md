@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) Codebar AG <info@codebar.ch>
+Copyright (c) codebar Solutions AG <info@codebar.ch>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

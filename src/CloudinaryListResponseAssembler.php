@@ -22,9 +22,13 @@ final class CloudinaryListResponseAssembler
      */
     public function shallowList(string $directoryPrefixed): array
     {
+        // Cloudinary matches `prefix` against the raw public ID, so "photos" would also
+        // match "photos-old/a.jpg" or "photos.jpg". Scope it to the folder itself.
+        $assetPrefix = $directoryPrefixed === '' ? '' : rtrim($directoryPrefixed, '/').'/';
+
         $baseOptions = [
             'type' => 'upload',
-            'prefix' => $directoryPrefixed,
+            'prefix' => $assetPrefix,
             'max_results' => 500,
         ];
 

@@ -10,6 +10,7 @@ use Cloudinary\Api\Exception\RateLimited;
 use Cloudinary\Cloudinary;
 use Cloudinary\Configuration\Configuration;
 use CodebarAg\FlysystemCloudinary\Concerns\InteractsWithCloudinaryMetadata;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use League\Flysystem\Config;
@@ -394,11 +395,14 @@ class FlysystemCloudinaryAdapter implements FilesystemAdapter
             return false;
         }
 
-        ['secure_url' => $url] = $response->getArrayCopy();
+        $url = $response->getArrayCopy()['secure_url'] ?? null;
+        if (! is_string($url) || $url === '') {
+            return false;
+        }
 
         try {
             $contents = Http::get($url)->throw()->body();
-        } catch (RequestException) {
+        } catch (RequestException|ConnectionException) {
             return false;
         }
 
