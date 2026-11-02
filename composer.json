@@ -30,7 +30,7 @@
         "laravel/pint": "^1.21",
         "larastan/larastan": "^3.9",
         "orchestra/testbench": "^11.0",
-        "pestphp/pest": "^4.0",
+        "pestphp/pest": "^5.3",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
